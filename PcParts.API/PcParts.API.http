@@ -1,0 +1,6 @@
+@PcParts.API_HostAddress = http://localhost:5258
+
+GET {{PcParts.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

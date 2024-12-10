@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PcParts.API", "PcParts.API\PcParts.API.csproj", "{2AEB2584-F1A7-415C-B62B-1E628F338DD3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoreBot", "PcParts.Bot\CoreBot\CoreBot.csproj", "{4AFAA9BF-4DB9-411C-B81A-08BCB9F586F3}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{2AEB2584-F1A7-415C-B62B-1E628F338DD3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2AEB2584-F1A7-415C-B62B-1E628F338DD3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2AEB2584-F1A7-415C-B62B-1E628F338DD3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2AEB2584-F1A7-415C-B62B-1E628F338DD3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4AFAA9BF-4DB9-411C-B81A-08BCB9F586F3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4AFAA9BF-4DB9-411C-B81A-08BCB9F586F3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4AFAA9BF-4DB9-411C-B81A-08BCB9F586F3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4AFAA9BF-4DB9-411C-B81A-08BCB9F586F3}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
