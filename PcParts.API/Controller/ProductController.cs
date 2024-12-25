@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using PcParts.API.DAL;
+using PcParts.API.DAL.Dto;
+using PcParts.API.DAL.Mapper;
 using PcParts.API.Models;
 
 namespace PcParts.API.Controller;
@@ -16,15 +18,15 @@ public class ProductController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Product>>> Get()
+    public async Task<ActionResult<IEnumerable<ProductResponse>>> Get()
     {
         IEnumerable<Product> products = await _productRepository.GetAllAsync();
-
-        return Ok(products);
+        List<ProductResponse> productResponses = products.Select(product => Mapper.ProductToDto(product)).ToList();
+        return Ok(productResponses);
     }
 
     [HttpGet("{id:guid}")]
-    public async Task<ActionResult<Product>> Get(Guid id)
+    public async Task<ActionResult<ProductResponse>> Get(Guid id)
     {
         Product? product = await _productRepository.GetByIdAsync(id);
 
@@ -32,7 +34,8 @@ public class ProductController : ControllerBase
         {
             return NotFound();
         }
-
-        return Ok(product);
+        
+        ProductResponse productResponse = Mapper.ProductToDto(product);
+        return Ok(productResponse);
     }
 }
