@@ -1,6 +1,6 @@
-namespace PcParts.API.Models;
+﻿namespace PcParts.API.DAL.Dto;
 
-public class Product
+public class ProductResponse
 {
     public Guid Id { get; set; }
     public string Name { get; set; }
@@ -8,5 +8,4 @@ public class Product
     public int Quantity { get; set; }
     public string Description { get; set; }
     public string Category { get; set; }
-    public IEnumerable<Order>? Orders { get; set; }
 }

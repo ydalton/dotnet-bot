@@ -6,6 +6,7 @@ using Microsoft.Identity.Abstractions;
 using Microsoft.Identity.Web.Resource;
 using PcParts.API.DAL;
 using PcParts.API.Data;
+using SolarFlare.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -36,6 +37,7 @@ if (app.Environment.IsDevelopment())
 using (var scope = app.Services.CreateScope())
 {
     var botContext = scope.ServiceProvider.GetRequiredService<BotContext>();
+    DBInitializer.Initialize(botContext);
     
     botContext.Database.EnsureCreated();
     botContext.Database.Migrate();
