@@ -1,9 +1,13 @@
 ﻿// Generated with CoreBot .NET Template version v4.22.0
 
+using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using CoreBot.Helpers;
 using Microsoft.Bot.Builder;
 using Microsoft.Bot.Builder.Dialogs;
+using Microsoft.Bot.Builder.Dialogs.Choices;
 using Microsoft.Bot.Schema;
 using Microsoft.Recognizers.Text.DataTypes.TimexExpression;
 
@@ -17,23 +21,23 @@ namespace CoreBot.Dialogs
         private const string CityStepMsgText = "What is your city?";
         private const string PostCodeStepMsgText = "What is your postcode?";
         private const string DeliveryStepMsgText = "Would you like a delivery or do you want it to pick it up yourself?";
+        private const string ConfirmStepMsgText = "Is this correct?";
 
         public OrderDialog()
             : base(nameof(OrderDialog))
         {
             AddDialog(new TextPrompt(nameof(TextPrompt)));
-            AddDialog(new ConfirmPrompt(nameof(ConfirmPrompt)));
-            AddDialog(new DateResolverDialog());
+            AddDialog(new ChoicePrompt(nameof(ChoicePrompt)));
 
             var waterfallSteps = new WaterfallStep[]
             {
-                NameStepAsync,
-                EmailStepAsync,
-                AddressStepAsync,
-                CityStepAsync,
-                PostcodeStepAsync,
-                DeliveryStepAsync,
-                ConfirmStepAsync,
+                FirstNameStepAsync,
+                NameEmailStepAsync,
+                EmailAddressStepAsync,
+                AddressCityStepAsync,
+                CityZipCodeStepAsync,
+                ZipCodeDeliveryStepAsync,
+                DeliveryConfirmOrderStepAsync,
                 FinalStepAsync,
             };
 
@@ -43,136 +47,121 @@ namespace CoreBot.Dialogs
             InitialDialogId = nameof(WaterfallDialog);
         }
 
-        private async Task<DialogTurnResult> NameStepAsync(WaterfallStepContext stepContext,
+        private async Task<DialogTurnResult> FirstNameStepAsync(WaterfallStepContext stepContext,
             CancellationToken cancellationToken)
         {
-            OrderDetails orderDetails = (OrderDetails) stepContext.Options;
+            OrderDetails orderDetails = (OrderDetails)stepContext.Options;
 
             if (orderDetails.Name == null)
             {
-                var promptMessage = MessageFactory.Text(NameStepMsgText, 
+                var promptMessage = MessageFactory.Text(NameStepMsgText,
                     NameStepMsgText, InputHints.ExpectingInput);
-                return await stepContext.PromptAsync(nameof(TextPrompt), 
+                return await stepContext.PromptAsync(nameof(TextPrompt),
                     new PromptOptions { Prompt = promptMessage }, cancellationToken);
             }
-            
+
             return await stepContext.NextAsync(orderDetails.Name, cancellationToken);
         }
-        
-        private async Task<DialogTurnResult> EmailStepAsync(WaterfallStepContext stepContext, 
+
+        private async Task<DialogTurnResult> NameEmailStepAsync(WaterfallStepContext stepContext,
             CancellationToken cancellationToken)
         {
-            OrderDetails orderDetails = (OrderDetails) stepContext.Options;
-            
-            orderDetails.Name = stepContext.Result.ToString();
+            OrderDetails orderDetails = (OrderDetails)stepContext.Options;
+            orderDetails.Name = (string)stepContext.Result;
 
             if (orderDetails.EmailAddress == null)
             {
-                var promptMessage = MessageFactory.Text(EmailStepMsgText, 
+                var promptMessage = MessageFactory.Text(EmailStepMsgText,
                     EmailStepMsgText, InputHints.ExpectingInput);
-                return await stepContext.PromptAsync(nameof(TextPrompt), 
+                return await stepContext.PromptAsync(nameof(TextPrompt),
                     new PromptOptions { Prompt = promptMessage }, cancellationToken);
             }
-            
+
             return await stepContext.NextAsync(orderDetails.EmailAddress, cancellationToken);
         }
 
-        private async Task<DialogTurnResult> AddressStepAsync(WaterfallStepContext stepContext,
+        private async Task<DialogTurnResult> EmailAddressStepAsync(WaterfallStepContext stepContext,
             CancellationToken cancellationToken)
         {
-            OrderDetails orderDetails = (OrderDetails) stepContext.Options;
-            
-            orderDetails.EmailAddress = stepContext.Result.ToString();
+            OrderDetails orderDetails = (OrderDetails)stepContext.Options;
+            orderDetails.EmailAddress = (string)stepContext.Result;
 
             if (orderDetails.StreetAddress == null)
             {
-                var promptMessage = MessageFactory.Text(AddressStepMsgText, 
+                var promptMessage = MessageFactory.Text(AddressStepMsgText,
                     AddressStepMsgText, InputHints.ExpectingInput);
-                return await stepContext.PromptAsync(nameof(TextPrompt), 
+                return await stepContext.PromptAsync(nameof(TextPrompt),
                     new PromptOptions { Prompt = promptMessage }, cancellationToken);
             }
-            
+
             return await stepContext.NextAsync(orderDetails.StreetAddress, cancellationToken);
         }
 
-        private async Task<DialogTurnResult> CityStepAsync(WaterfallStepContext stepContext,
+        private async Task<DialogTurnResult> AddressCityStepAsync(WaterfallStepContext stepContext,
             CancellationToken cancellationToken)
         {
-            OrderDetails orderDetails = (OrderDetails) stepContext.Options;
-            
-            orderDetails.StreetAddress = stepContext.Result.ToString();
-            
+            OrderDetails orderDetails = (OrderDetails)stepContext.Options;
+            orderDetails.StreetAddress = (string)stepContext.Result;
+
             if (orderDetails.City == null)
             {
-                var promptMessage = MessageFactory.Text(CityStepMsgText, 
+                var promptMessage = MessageFactory.Text(CityStepMsgText,
                     CityStepMsgText, InputHints.ExpectingInput);
-                return await stepContext.PromptAsync(nameof(TextPrompt), 
+                return await stepContext.PromptAsync(nameof(TextPrompt),
                     new PromptOptions { Prompt = promptMessage }, cancellationToken);
             }
-            
+
             return await stepContext.NextAsync(orderDetails.City, cancellationToken);
         }
 
-        private async Task<DialogTurnResult> PostcodeStepAsync(WaterfallStepContext stepContext,
+        private async Task<DialogTurnResult> CityZipCodeStepAsync(WaterfallStepContext stepContext,
             CancellationToken cancellationToken)
         {
-            OrderDetails orderDetails = (OrderDetails) stepContext.Options;
-            
-            orderDetails.City = stepContext.Result.ToString();
+            OrderDetails orderDetails = (OrderDetails)stepContext.Options;
+            orderDetails.City = (string)stepContext.Result;
 
             if (orderDetails.PostCode == null)
             {
-                var promptMessage = MessageFactory.Text(PostCodeStepMsgText, 
+                var promptMessage = MessageFactory.Text(PostCodeStepMsgText,
                     PostCodeStepMsgText, InputHints.ExpectingInput);
-                return await stepContext.PromptAsync(nameof(TextPrompt), 
+                return await stepContext.PromptAsync(nameof(TextPrompt),
                     new PromptOptions { Prompt = promptMessage }, cancellationToken);
             }
-            
+
             return await stepContext.NextAsync(orderDetails.PostCode, cancellationToken);
         }
-        
-        private async Task<DialogTurnResult> DeliveryStepAsync(WaterfallStepContext stepContext,
+
+        private async Task<DialogTurnResult> ZipCodeDeliveryStepAsync(WaterfallStepContext stepContext,
             CancellationToken cancellationToken)
         {
-            OrderDetails orderDetails = (OrderDetails) stepContext.Options;
-            
-            orderDetails.City = stepContext.Result.ToString();
-            
-            if (orderDetails.IsDelivery == null)
+            OrderDetails orderDetails = (OrderDetails)stepContext.Options;
+            orderDetails.PostCode = (string)stepContext.Result;
+
+            if (orderDetails.IsDelivery == false)
             {
-                var promptMessage = MessageFactory.Text(DeliveryStepMsgText, 
-                    DeliveryStepMsgText, InputHints.ExpectingInput);
-                return await stepContext.PromptAsync(nameof(TextPrompt), 
-                    new PromptOptions { Prompt = promptMessage }, cancellationToken);
+                await stepContext.Context.SendActivityAsync(MessageFactory.Text(DeliveryStepMsgText), cancellationToken);
+                List<string> deliveryList = new List<string> { "Delivery", "Pick-up" };
+                return await ChoicePromptHelper.PromptChoiceAsync(deliveryList, stepContext, cancellationToken);
             }
-            
+
             return await stepContext.NextAsync(orderDetails.IsDelivery, cancellationToken);
         }
-
-        private async Task<DialogTurnResult> ConfirmStepAsync(WaterfallStepContext stepContext,
+        
+        private async Task<DialogTurnResult> DeliveryConfirmOrderStepAsync(WaterfallStepContext stepContext,
             CancellationToken cancellationToken)
         {
-            OrderDetails orderDetails = (OrderDetails) stepContext.Options;
+            OrderDetails orderDetails = (OrderDetails)stepContext.Options;
             
-            string response = stepContext.Result.ToString().ToLower();
-            bool isDelivery = response.Contains("deliver");
-
-            /* either one or the other, not both and not neither */
-            if (isDelivery ^ response.Contains("pick"))
+            if (((FoundChoice)stepContext.Result).Value == "Delivery")
             {
-                stepContext.Values["IsDelivery"] = isDelivery;
-                orderDetails.IsDelivery = isDelivery;
+                orderDetails.IsDelivery = true;
             }
-            else
+            else if (((FoundChoice)stepContext.Result).Value == "Pick-up")
             {
-                await stepContext.Context.SendActivityAsync(MessageFactory.Text(
-                    "Please answer with 'delivery' or 'pick-up'."), cancellationToken);
-                return await stepContext.ReplaceDialogAsync(nameof(OrderDialog), stepContext.Options, cancellationToken);
+                orderDetails.IsDelivery = false;
             }
-
-            string deliveryMode =
-                (bool) orderDetails.IsDelivery ? "Delivery" : "Pick up";
             
+            var deliveryMethod = orderDetails.IsDelivery ? "Delivery" : "Pick-up";
             var messageText =
                 $"Okay, I have written down the details of the order:\n\n"
                 + $"Name: {orderDetails.Name}\n"
@@ -180,26 +169,28 @@ namespace CoreBot.Dialogs
                 + $"Address: {orderDetails.StreetAddress}\n"
                 + $"City: {orderDetails.City}\n"
                 + $"Post code: {orderDetails.PostCode}\n"
-                + $"Delivery method: {deliveryMode}\n\n"
-                + "Is this correct?";
-            
-            var promptMessage = MessageFactory.Text(messageText, 
+                + $"Delivery method: {deliveryMethod}\n\n";
+
+            var promptMessage = MessageFactory.Text(messageText,
                 messageText, InputHints.ExpectingInput);
+            await stepContext.Context.SendActivityAsync(promptMessage, cancellationToken);
 
-            return await stepContext.PromptAsync(nameof(ConfirmPrompt), new PromptOptions { Prompt = promptMessage },
-                cancellationToken);
+            await stepContext.Context.SendActivityAsync(MessageFactory.Text(ConfirmStepMsgText), cancellationToken);
+            var yesnoList = new List<string> { "Yes", "No" };
+            return await ChoicePromptHelper.PromptChoiceAsync(yesnoList, stepContext, cancellationToken);
         }
-
-
+        
         private async Task<DialogTurnResult> FinalStepAsync(WaterfallStepContext stepContext,
             CancellationToken cancellationToken)
         {
-            if ((bool)stepContext.Result)
-            {
-                var orderDetails = (OrderDetails)stepContext.Options;
-
-                return await stepContext.EndDialogAsync(orderDetails, cancellationToken);
-            }
+            string orderNumber = "02bsl52osnbfk";
+            // TODO: Write info to database
+            // if (((FoundChoice)stepContext.Result).Value == "Yes")
+            // {
+                    // var orderDetails = (OrderDetails)stepContext.Options;
+                    // await stepContext.Context.SendActivityAsync(MessageFactory.Text($"I have placed the order. Your order number is {orderNumber}. Check your inbox for details.), cancellationToken"));
+            //     return await stepContext.EndDialogAsync(orderDetails, cancellationToken);
+            // }
 
             return await stepContext.EndDialogAsync(null, cancellationToken);
         }
