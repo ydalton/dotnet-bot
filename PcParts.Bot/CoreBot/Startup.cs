@@ -42,7 +42,7 @@ namespace CoreBot
             services.AddSingleton<FlightBookingRecognizer>();
 
             // Register the BookingDialog.
-            services.AddSingleton<BookingDialog>();
+            services.AddSingleton<OrderDialog>();
 
             // The MainDialog that will be run by the bot.
             services.AddSingleton<MainDialog>();

@@ -19,7 +19,7 @@ namespace CoreBot.Dialogs
         private readonly ILogger _logger;
 
         // Dependency injection uses this constructor to instantiate MainDialog
-        public MainDialog(FlightBookingRecognizer luisRecognizer, BookingDialog bookingDialog,
+        public MainDialog(FlightBookingRecognizer luisRecognizer, OrderDialog orderDialog,
             ILogger<MainDialog> logger)
             : base(nameof(MainDialog))
         {
@@ -27,7 +27,7 @@ namespace CoreBot.Dialogs
             _logger = logger;
 
             AddDialog(new TextPrompt(nameof(TextPrompt)));
-            AddDialog(bookingDialog);
+            AddDialog(orderDialog);
 
             var waterfallSteps = new WaterfallStep[]
             {
@@ -98,7 +98,7 @@ namespace CoreBot.Dialogs
             if (!_luisRecognizer.IsConfigured)
             {
                 // LUIS is not configured, we just run the BookingDialog path with an empty BookingDetailsInstance.
-                return await stepContext.BeginDialogAsync(nameof(BookingDialog), new BookingDetails(),
+                return await stepContext.BeginDialogAsync(nameof(OrderDialog), new OrderDetails(),
                     cancellationToken);
             }
 
@@ -111,16 +111,18 @@ namespace CoreBot.Dialogs
                     await ShowWarningForUnsupportedCities(stepContext.Context, luisResult, cancellationToken);
 
                     // Initialize BookingDetails with any entities we may have found in the response.
-                    var bookingDetails = new BookingDetails()
+                    var bookingDetails = new OrderDetails()
                     {
                         // Get destination and origin from the composite entities arrays.
+                        /*
                         Destination = luisResult.ToEntities.Airport,
                         Origin = luisResult.FromEntities.Airport,
                         TravelDate = luisResult.TravelDate,
+                    */
                     };
 
                     // Run the BookingDialog giving it whatever details we have from the LUIS call, it will fill out the remainder.
-                    return await stepContext.BeginDialogAsync(nameof(BookingDialog), bookingDetails, cancellationToken);
+                    return await stepContext.BeginDialogAsync(nameof(OrderDialog), bookingDetails, cancellationToken);
 
                 case FlightBooking.Intent.GetWeather:
                     // We haven't implemented the GetWeatherDialog so we just display a TODO message.
@@ -148,15 +150,18 @@ namespace CoreBot.Dialogs
         {
             // If the child dialog ("BookingDialog") was cancelled, the user failed to confirm or if the intent wasn't BookFlight
             // the Result here will be null.
-            if (stepContext.Result is BookingDetails result)
+            if (stepContext.Result is OrderDetails result)
             {
+                string orderNumber = "02bsl52osnbfk";
                 // Now we have all the booking details call the booking service.
 
                 // If the call to the booking service was successful tell the user.
 
+                /*
                 var timeProperty = new TimexProperty(result.TravelDate);
                 var travelDateMsg = timeProperty.ToNaturalLanguage(DateTime.Now);
-                var messageText = $"I have you booked to {result.Destination} from {result.Origin} on {travelDateMsg}";
+                */
+                var messageText = $"I have placed the order. Your order number is {orderNumber}. Check your inbox for details.";
                 var message = MessageFactory.Text(messageText, messageText, InputHints.IgnoringInput);
                 await stepContext.Context.SendActivityAsync(message, cancellationToken);
             }
