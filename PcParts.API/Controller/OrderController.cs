@@ -59,10 +59,12 @@ public class OrderController : ControllerBase
         
         Order order = new Order
         {
+            Name = orderRequest.Name,
             Email = orderRequest.EmailAddress,
+            Phone = orderRequest.PhoneNumber,
             Street = orderRequest.StreetAddress,
             City = orderRequest.City,
-            ZipCode = orderRequest.PostCode,
+            ZipCode = orderRequest.ZipCode,
             IsDelivery = orderRequest.IsDelivery,
             Products = new List<Product> { product },
         };
@@ -70,6 +72,6 @@ public class OrderController : ControllerBase
         _orderRepository.Insert(order);
         await _orderRepository.SaveAsync();
 
-        return Ok(Mapper.OrderToDto(order));
+        return CreatedAtAction(nameof(GetOrderById), new { id = order.Id }, Mapper.OrderToDto(order));
     }
 }

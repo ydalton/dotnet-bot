@@ -23,6 +23,7 @@ public static class Mapper
         return new OrderResponse()
         {
             Id = order.Id,
+            Name = order.Name,
             Email = order.Email,
             Phone = order.Phone,
             Street = order.Street,
