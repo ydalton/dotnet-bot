@@ -1,6 +1,6 @@
 ﻿// Generated with CoreBot .NET Template version v4.22.0
 
-namespace CoreBot
+namespace CoreBot.DialogDetails
 {
     public class OrderDetails
     {
@@ -10,6 +10,6 @@ namespace CoreBot
         public string EmailAddress { get; set; }
         public string StreetAddress { get; set; }
         public string City { get; set; }
-        public string PostCode { get; set; }
+        public string ZipCode { get; set; }
     }
 }
