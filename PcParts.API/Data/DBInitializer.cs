@@ -96,6 +96,7 @@ namespace SolarFlare.Data
             var order1 = new Order
             {
                 Id = Guid.NewGuid(),
+                Name = "Jan Janssens",
                 Email = "janjanssens@gmail.com",
                 Phone = "32468799972",
                 Street = "Kerkstraat",
@@ -109,6 +110,7 @@ namespace SolarFlare.Data
             {
                 Id = Guid.NewGuid(),
                 Email = "johndoe@gmail.com",
+                Name = "John Doe",
                 Phone = "32468799974",
                 Street = "Nieuwelaan",
                 City = "Brussel",
@@ -120,6 +122,7 @@ namespace SolarFlare.Data
             var order3 = new Order
             {
                 Id = Guid.NewGuid(),
+                Name = "Jane Doe",
                 Email = "janedoe@gmail.com",
                 Phone = "32468799976",
                 Street = "Lentestraat",
