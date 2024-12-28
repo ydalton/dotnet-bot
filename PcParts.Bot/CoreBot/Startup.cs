@@ -41,8 +41,11 @@ namespace CoreBot
             // Register LUIS recognizer
             services.AddSingleton<FlightBookingRecognizer>();
 
-            // Register the BookingDialog.
+            // Register the OrderDialog.
             services.AddSingleton<OrderDialog>();
+            
+            // Register the ReturnOrderDialog.
+            services.AddSingleton<ReturnOrderDialog>();
 
             // The MainDialog that will be run by the bot.
             services.AddSingleton<MainDialog>();

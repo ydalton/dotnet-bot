@@ -1,4 +1,5 @@
 ﻿using PcParts.API.DAL.Dto;
+using PcParts.API.Dto;
 using PcParts.API.Models;
 
 namespace PcParts.API.DAL.Mapper;
@@ -31,6 +32,26 @@ public static class Mapper
             ZipCode = order.ZipCode,
             IsDelivery = order.IsDelivery,
             Products = order.Products.Select(product => ProductToDto(product)).ToList()
+        };
+    }
+    
+    public static ReasonResponse ReasonToDto(Reason reason)
+    {
+        return new ReasonResponse()
+        {
+            Id = reason.Id,
+            Name = reason.Name
+        };
+    }
+    
+    public static ReturnOrderResponse ReturnOrderToDto(ReturnOrder returnOrder)
+    {
+        return new ReturnOrderResponse()
+        {
+            Id = returnOrder.Id,
+            OrderId = returnOrder.OrderId,
+            Reason = ReasonToDto(returnOrder.Reason),
+            IsCash = returnOrder.IsCash,
         };
     }
 }

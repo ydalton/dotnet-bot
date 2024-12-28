@@ -18,7 +18,7 @@ public class ProductController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<ProductResponse>>> Get()
+    public async Task<ActionResult<IEnumerable<ProductResponse>>> GetAllProducts()
     {
         IEnumerable<Product> products = await _productRepository.GetAllAsync();
         List<ProductResponse> productResponses = products.Select(product => Mapper.ProductToDto(product)).ToList();
@@ -26,7 +26,7 @@ public class ProductController : ControllerBase
     }
 
     [HttpGet("{id:guid}")]
-    public async Task<ActionResult<ProductResponse>> Get(Guid id)
+    public async Task<ActionResult<ProductResponse>> GetProductById(Guid id)
     {
         Product? product = await _productRepository.GetByIdAsync(id);
 

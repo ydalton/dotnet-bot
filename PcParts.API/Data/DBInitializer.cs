@@ -134,6 +134,58 @@ namespace SolarFlare.Data
             
             context.Orders.AddRange(order1, order2, order3);
             context.SaveChanges();
+            
+            var reason1 = new Reason
+            {
+                Id = Guid.NewGuid(),
+                Name = "The item is defective or damaged"
+            };
+
+            var reason2 = new Reason
+            {
+                Id = Guid.NewGuid(),
+                Name = "The item did not meet your expectations"
+            };
+
+            var reason3 = new Reason
+            {
+                Id = Guid.NewGuid(),
+                Name = "Received the wrong item"
+            };
+
+            var reason4 = new Reason
+            {
+                Id = Guid.NewGuid(),
+                Name = "The item is the wrong color"
+            };
+
+            var reason5 = new Reason
+            {
+                Id = Guid.NewGuid(),
+                Name = "Something else"
+            };
+
+            context.Reasons.AddRange(reason1, reason2, reason3, reason4, reason5);
+            context.SaveChanges();
+
+            var returnOrder1 = new ReturnOrder
+            {
+                Id = Guid.NewGuid(),
+                OrderId = order1.Id,
+                Reason = reason1,
+                IsCash = true
+            };
+            
+            var returnOrder2 = new ReturnOrder
+            {
+                Id = Guid.NewGuid(),
+                OrderId = order2.Id,
+                Reason = reason4,
+                IsCash = true
+            };
+            
+            context.ReturnOrders.AddRange(returnOrder1, returnOrder2);
+            context.SaveChanges();
         }
     }
 }
