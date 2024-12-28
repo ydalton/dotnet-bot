@@ -1,209 +1,188 @@
-﻿// using System;
-// using System.Collections.Generic;
-// using System.Text.RegularExpressions;
-// using System.Threading;
-// using System.Threading.Tasks;
-// using Microsoft.Bot.Builder;
-// using Microsoft.Bot.Builder.Dialogs;
-// using Microsoft.Bot.Builder.Dialogs.Choices;
-// using Microsoft.Bot.Schema;
-//
-// namespace CoreBot.Dialogs;
-//
-// public class ReturnOrderDialog: CancelAndHelpDialog
-// {
-//     private const string OrderNumberStepMsgText = "What is your order number?";
-//     private const string TimeStepMsgText = "Would you like to book a table for lunch or dinner?";
-//     private const string CountStepMsgText = "For how many people do you wish to reserve?";
-//     private const string EmailStepMsgText = "To what email address may we send the confirmation?";
-//     private const string PhoneStepMsgText = "What is your phone number?";
-//     private const string ConfirmStepMsgText = "Is this correct?";
-//
-//     private readonly string EmailDialogID = "EmailDialogID";
-//     private readonly string PhoneDialogID = "PhoneDialogID";
-//     
-//     public ReturnOrderDialog()
-//         : base(nameof(ReturnOrderDialog))
-//     {
-//         AddDialog(new TextPrompt(nameof(TextPrompt)));
-//         AddDialog(new ChoicePrompt(nameof(ChoicePrompt)));
-//         AddDialog(new TextPrompt(EmailDialogID, EmailValidation));
-//         AddDialog(new TextPrompt(PhoneDialogID, PhoneValidation));
-//
-//         var waterfallSteps = new WaterfallStep[]
-//         {
-//             FirstOrderNumberStepAsync,
-//             NameDateStepAsync,
-//             DateTimeStepAsync,
-//             TimeCountStepAsync,
-//             CountEmailStepAsync,
-//             EmailPhoneStepAsync,
-//             PhoneConfirmStepAsync,
-//             ConfirmActStepAsync,
-//         };
-//
-//         AddDialog(new WaterfallDialog(nameof(WaterfallDialog), waterfallSteps));
-//         InitialDialogId = nameof(WaterfallDialog);
-//     }
-//     
-//     private async Task<DialogTurnResult> FirstOrderNumberStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
-//         {
-//             var bookTableDetails = (BookTableDetails)stepContext.Options;
-//
-//             if (bookTableDetails.Name == null)
-//             {
-//                 var promptMessage = MessageFactory.Text(NameStepMsgText, NameStepMsgText, InputHints.ExpectingInput);
-//                 return await stepContext.PromptAsync(nameof(TextPrompt), new PromptOptions { Prompt = promptMessage }, cancellationToken);
-//             }
-//
-//             return await stepContext.NextAsync(bookTableDetails.Name, cancellationToken);
-//         }
-//
-//         private async Task<DialogTurnResult> NameDateStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
-//         {
-//             var bookTableDetails = (BookTableDetails)stepContext.Options;
-//             bookTableDetails.Name = (string)stepContext.Result;
-//
-//             if (bookTableDetails.Date == null)
-//             {
-//                 return await stepContext.BeginDialogAsync(nameof(DateResolverDialog), bookTableDetails.Date, cancellationToken);
-//             }
-//
-//             return await stepContext.NextAsync(bookTableDetails.Date, cancellationToken);
-//         }
-//
-//         private async Task<DialogTurnResult> DateTimeStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
-//         {
-//             var bookTableDetails = (BookTableDetails)stepContext.Options;
-//             bookTableDetails.Date = (string)stepContext.Result;
-//
-//             if (bookTableDetails.Time == null)
-//             {
-//                 await stepContext.Context.SendActivityAsync(MessageFactory.Text(TimeStepMsgText), cancellationToken);
-//                 List<string> timeList = new List<string> { "lunch", "dinner" };
-//                 return await ChoicePromptHelper.PromptChoiceAsync(timeList, stepContext, cancellationToken);
-//             }
-//
-//             return await stepContext.NextAsync(bookTableDetails.Time, cancellationToken);
-//         }
-//
-//         private async Task<DialogTurnResult> TimeCountStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
-//         {
-//             var bookTableDetails = (BookTableDetails)stepContext.Options;
-//             try
-//             {
-//                 bookTableDetails.Time = ((FoundChoice)stepContext.Result).Value;
-//             }
-//             catch (Exception)
-//             {
-//                 bookTableDetails.Time = (string)stepContext.Result;
-//             }
-//
-//             if (bookTableDetails.Count == null)
-//             {
-//                 var promptMessage = MessageFactory.Text(CountStepMsgText, CountStepMsgText, InputHints.ExpectingInput);
-//                 return await stepContext.PromptAsync(nameof(TextPrompt), new PromptOptions { Prompt = promptMessage }, cancellationToken);
-//             }
-//
-//             return await stepContext.NextAsync(bookTableDetails.Count, cancellationToken);
-//         }
-//
-//         private async Task<DialogTurnResult> CountEmailStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
-//         {
-//             var bookTableDetails = (BookTableDetails)stepContext.Options;
-//             bookTableDetails.Count = (string)stepContext.Result;
-//
-//             if (bookTableDetails.Email == null)
-//             {
-//                 var promptMessage = MessageFactory.Text(EmailStepMsgText, EmailStepMsgText, InputHints.ExpectingInput);
-//                 return await stepContext.PromptAsync(EmailDialogID, new PromptOptions { Prompt = promptMessage }, cancellationToken);
-//             }
-//
-//             return await stepContext.NextAsync(bookTableDetails.Email, cancellationToken);
-//         }
-//
-//         private async Task<DialogTurnResult> EmailPhoneStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
-//         {
-//             var bookTableDetails = (BookTableDetails)stepContext.Options;
-//             bookTableDetails.Email = (string)stepContext.Result;
-//
-//             if (bookTableDetails.Phone == null)
-//             {
-//                 var promptMessage = MessageFactory.Text(PhoneStepMsgText, PhoneStepMsgText, InputHints.ExpectingInput);
-//                 return await stepContext.PromptAsync(PhoneDialogID, new PromptOptions { Prompt = promptMessage }, cancellationToken);
-//             }
-//
-//             return await stepContext.NextAsync(bookTableDetails.Phone, cancellationToken);
-//         }
-//
-//         private async Task<DialogTurnResult> PhoneConfirmStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
-//         {
-//             var bookTableDetails = (BookTableDetails)stepContext.Options;
-//             bookTableDetails.Phone = (string)stepContext.Result;
-//
-//             var attachment = ConfirmCard.CreateCardAttachment(
-//                 $"Name: {bookTableDetails.Name}",
-//                 $"Contact Details: {bookTableDetails.Email} ({bookTableDetails.Phone})",
-//                 $"Number of People: {bookTableDetails.Count}",
-//                 $"On: {bookTableDetails.Date} for {bookTableDetails.Time}");
-//
-//             var activity = MessageFactory.Attachment(attachment);
-//             await stepContext.Context.SendActivityAsync(activity, cancellationToken);
-//
-//             await stepContext.Context.SendActivityAsync(MessageFactory.Text(ConfirmStepMsgText), cancellationToken);
-//             var yesnoList = new List<string> { "yes", "no" };
-//             return await ChoicePromptHelper.PromptChoiceAsync(yesnoList, stepContext, cancellationToken);
-//         }
-//
-//         private async Task<DialogTurnResult> ConfirmActStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
-//         {
-//             if (((FoundChoice)stepContext.Result).Value == "yes")
-//             {
-//                 var bookTableDetails = (BookTableDetails)stepContext.Options;
-//                 // This is the place to save the booking into the database.
-//                 await ReservationDataService.InsertReservationAsync(new Reservation
-//                 {
-//                     Name = bookTableDetails.Name,
-//                     Date = bookTableDetails.Date,
-//                     Time = bookTableDetails.Time,
-//                     Count = bookTableDetails.Count,
-//                     Email = bookTableDetails.Email,
-//                     Phone = bookTableDetails.Phone
-//                 });
-//                 await stepContext.Context.SendActivityAsync(MessageFactory.Text("Your reservation is saved. Thank you."), cancellationToken);
-//
-//                 return await stepContext.EndDialogAsync(bookTableDetails, cancellationToken);
-//             }
-//
-//             return await stepContext.EndDialogAsync(null, cancellationToken);
-//         }
-//
-//         private async Task<bool> EmailValidation(PromptValidatorContext<string> promptcontext, CancellationToken cancellationtoken)
-//         {
-//             const string EmailValidationError = "The email you entered is not valid, please enter a valid email.";
-//
-//             string email = promptcontext.Recognized.Value;
-//             if (Regex.IsMatch(email, @"^[\w\.-]+@[a-zA-Z\d\.-]+\.[a-zA-Z]{2,}$"))
-//             {
-//                 return true;
-//             }
-//             await promptcontext.Context.SendActivityAsync(EmailValidationError,
-//                         cancellationToken: cancellationtoken);
-//             return false;
-//         }
-//
-//         private async Task<bool> PhoneValidation(PromptValidatorContext<string> promptcontext, CancellationToken cancellationtoken)
-//         {
-//             const string PhoneValidationError = "The phone number is not valid. Please use these formats: \"014 58 03 35\", \"0465 05 32 63\", \"+32 569 32 65 21\", \"+1 586 32 65 02\"";
-//
-//             string number = promptcontext.Recognized.Value;
-//             if (Regex.IsMatch(number, @"^(\+?\d{1,3} )?\d{3,4}( \d{2}){2,4}$"))
-//             {
-//                 return true;
-//             }
-//             await promptcontext.Context.SendActivityAsync(PhoneValidationError,
-//                         cancellationToken: cancellationtoken);
-//             return false;
-//         }
-//     }
-// }
+﻿using System;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
+using CoreBot.Cards;
+using CoreBot.Dto;
+using CoreBot.Helpers;
+using CoreBot.Services;
+using Microsoft.Bot.Builder;
+using Microsoft.Bot.Builder.Dialogs;
+using Microsoft.Bot.Builder.Dialogs.Choices;
+using Microsoft.Bot.Schema;
+using Newtonsoft.Json.Linq;
+using PcParts.API.Dto;
+
+namespace CoreBot.Dialogs;
+
+public class ReturnOrderDialog : CancelAndHelpDialog
+{
+    private readonly string ReasonDialogID = "ReasonDialogID";
+    private const string OrderNumberStepMsgText = "What is your order number?";
+    private const string ReasonStepMsgText =
+        "We would like to understand the reason for your return. Could you please provide us with some details about why you are returning the item?";
+    private const string RefundOptionStepMsgText = "Would you prefer to receive your refund in cash or as a gift card?";
+    private const string ConfirmStepMsgText = "Are you sure you want to return this order?";
+   
+    private readonly string OrderNumberDialogID = "OrderNumberDialogID";
+    
+    public ReturnOrderDialog()
+        : base(nameof(ReturnOrderDialog))
+    {
+        AddDialog(new TextPrompt(nameof(TextPrompt)));
+        AddDialog(new ChoicePrompt(nameof(ChoicePrompt)));
+        AddDialog(new SelectPromptHelper(ReasonDialogID));
+        AddDialog(new TextPrompt(OrderNumberDialogID, OrderNumberValidation));
+
+        var waterfallSteps = new WaterfallStep[]
+        {
+            FirstOrderNumberStepAsync,
+            OrderNumberReasonStepAsync,
+            ReasonRefundOptionStepAsync,
+            RefundOptionConfirmStepAsync,
+            ConfirmActStepAsync,
+        };
+
+        AddDialog(new WaterfallDialog(nameof(WaterfallDialog), waterfallSteps));
+        InitialDialogId = nameof(WaterfallDialog);
+    }
+
+    private async Task<DialogTurnResult> FirstOrderNumberStepAsync(WaterfallStepContext stepContext,
+        CancellationToken cancellationToken)
+    {
+        var returnOrderDetails = (ReturnOrderDetails)stepContext.Options;
+
+        if (returnOrderDetails.OrderNumber == null)
+        {
+            var promptMessage =
+                MessageFactory.Text(OrderNumberStepMsgText, OrderNumberStepMsgText, InputHints.ExpectingInput);
+            return await stepContext.PromptAsync(OrderNumberDialogID, new PromptOptions { Prompt = promptMessage },
+                cancellationToken);
+        }
+
+        return await stepContext.NextAsync(returnOrderDetails.OrderNumber, cancellationToken);
+    }
+
+    private async Task<DialogTurnResult> OrderNumberReasonStepAsync(WaterfallStepContext stepContext,
+        CancellationToken cancellationToken)
+    {
+        var returnOrderDetails = (ReturnOrderDetails)stepContext.Options;
+        returnOrderDetails.OrderNumber = (string)stepContext.Result;
+
+        if (returnOrderDetails.ReasonId == null)
+        {
+            var promptMessage = MessageFactory.Text(ReasonStepMsgText,
+                ReasonStepMsgText, InputHints.ExpectingInput);
+            await stepContext.Context.SendActivityAsync(promptMessage, cancellationToken);
+
+            var reasons = await ReasonService.GetReasonsAsync();
+            var attachment = ReasonCard.CreateCardAttachment(reasons);
+
+            var options = new PromptOptions
+            {
+                Prompt = new Activity
+                {
+                    Attachments = new List<Attachment>() { attachment },
+                    Type = ActivityTypes.Message
+                }
+            };
+
+            return await stepContext.PromptAsync(ReasonDialogID, options, cancellationToken);
+        }
+
+        return await stepContext.NextAsync(returnOrderDetails.ReasonId, cancellationToken);
+    }
+
+    private async Task<DialogTurnResult> ReasonRefundOptionStepAsync(WaterfallStepContext stepContext,
+        CancellationToken cancellationToken)
+    {
+        var returnOrderDetails = (ReturnOrderDetails)stepContext.Options;
+
+        try
+        {
+            var result = stepContext.Result.ToString();
+            dynamic data = JObject.Parse(result);
+            returnOrderDetails.ReasonId = data.reasonChoice.ToString();
+        }
+        catch (Exception)
+        {
+            returnOrderDetails.ReasonId = (string)stepContext.Result;
+        }
+
+        if (returnOrderDetails.IsCash == false)
+        {
+            await stepContext.Context.SendActivityAsync(MessageFactory.Text(RefundOptionStepMsgText),
+                cancellationToken);
+            List<string> refundOptionList = new List<string> { "Cash", "Gift card" };
+            return await ChoicePromptHelper.PromptChoiceAsync(refundOptionList, stepContext, cancellationToken);
+        }
+
+        return await stepContext.NextAsync(returnOrderDetails.IsCash, cancellationToken);
+    }
+
+    private async Task<DialogTurnResult> RefundOptionConfirmStepAsync(WaterfallStepContext stepContext,
+        CancellationToken cancellationToken)
+    {
+        var returnOrderDetails = (ReturnOrderDetails)stepContext.Options;
+        if (((FoundChoice)stepContext.Result).Value == "Cash")
+        {
+            returnOrderDetails.IsCash = true;
+        }
+        else if (((FoundChoice)stepContext.Result).Value == "Gift Card")
+        {
+            returnOrderDetails.IsCash = false;
+        }
+        
+        var reason = await ReasonService.GetReasonByIdAsync(Guid.Parse(returnOrderDetails.ReasonId));
+
+        var attachment = ConfirmCardReturn.CreateCardAttachment(
+            $"Order Number: {returnOrderDetails.OrderNumber}",
+            $"Reason: {reason.Name}",
+            $"Refund Option: {(returnOrderDetails.IsCash ? "Cash" : "Gift card")}");
+        
+        var activity = MessageFactory.Attachment(attachment);
+        await stepContext.Context.SendActivityAsync(activity, cancellationToken);
+
+        await stepContext.Context.SendActivityAsync(MessageFactory.Text(ConfirmStepMsgText), cancellationToken);
+        var yesnoList = new List<string> { "Yes", "No" };
+        return await ChoicePromptHelper.PromptChoiceAsync(yesnoList, stepContext, cancellationToken);
+    }
+    
+    private async Task<DialogTurnResult> ConfirmActStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
+    {
+        if (((FoundChoice)stepContext.Result).Value == "Yes")
+        {
+            var returnOrderDetails = (ReturnOrderDetails)stepContext.Options;
+            await ReturnOrderService.InsertReturnOrderAsync(new ReturnOrderRequest()
+            {
+                OrderId = returnOrderDetails.OrderNumber,
+                IsCash = returnOrderDetails.IsCash,
+                ReasonId = returnOrderDetails.ReasonId,
+            });
+            await stepContext.Context.SendActivityAsync(MessageFactory.Text("Your return is created!"), cancellationToken);
+            await stepContext.Context.SendActivityAsync(MessageFactory.Text("Place all items back in the original box. Seal the box. Then, drop off the package at a post office, Post point, or Parcel Point."), cancellationToken);
+
+            return await stepContext.EndDialogAsync(returnOrderDetails, cancellationToken);
+        }
+
+        return await stepContext.EndDialogAsync(null, cancellationToken);
+    }
+    
+    private async Task<bool> OrderNumberValidation(PromptValidatorContext<string> promptcontext, CancellationToken cancellationtoken)
+    {
+        const string OrderNumberError = "The order number you entered is not valid or there has been a request for a return already for this order number. Please enter a valid order number.";
+
+        string orderNumber = promptcontext.Recognized.Value;
+        var orderNumberGuid = Guid.Parse(orderNumber);
+        var order = await OrderService.GetOrderByIdAsync(orderNumberGuid);
+        var returnOrder = await ReturnOrderService.CheckOrderNumberExistsInReturnOrder(orderNumberGuid);
+        
+        if (order != null && !returnOrder)
+        {
+            return true;
+        }
+        await promptcontext.Context.SendActivityAsync(OrderNumberError,
+            cancellationToken: cancellationtoken);
+        return false;
+    }
+}
