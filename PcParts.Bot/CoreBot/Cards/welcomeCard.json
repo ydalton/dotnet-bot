@@ -5,42 +5,26 @@
   "body": [
     {
       "type": "Image",
-      "url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQtB3AwMUeNoq4gUBGe6Ocj8kyh3bXa9ZbV7u1fVKQoyKFHdkqU",
+      "url": "https://nesimd.pythonanywhere.com/static/logo-pc-part.png",
       "size": "stretch"
     },
     {
       "type": "TextBlock",
       "spacing": "medium",
-      "size": "default",
+      "size": "large",
       "weight": "bolder",
-      "text": "Welcome to Bot Framework!",
+      "text": "Welcome to PC Parts!",
       "wrap": true,
+      
       "maxLines": 0
     },
     {
       "type": "TextBlock",
       "size": "default",
       "isSubtle": true,
-      "text": "Now that you have successfully run your bot, follow the links in this Adaptive Card to expand your knowledge of Bot Framework.",
+      "text": "I'm your virtual assistant, here to ensure your shopping experience is exceptional. Whether you're looking to order PC parts, return a product, check our opening hours, or browse our catalog, I'm here to help you every step of the way. Let's make your tech dreams a reality!",
       "wrap": true,
       "maxLines": 0
-    }
-  ],
-  "actions": [
-    {
-      "type": "Action.OpenUrl",
-      "title": "Get an overview",
-      "url": "https://docs.microsoft.com/en-us/azure/bot-service/?view=azure-bot-service-4.0"
-    },
-    {
-      "type": "Action.OpenUrl",
-      "title": "Ask a question",
-      "url": "https://stackoverflow.com/questions/tagged/botframework"
-    },
-    {
-      "type": "Action.OpenUrl",
-      "title": "Learn how to deploy",
-      "url": "https://docs.microsoft.com/en-us/azure/bot-service/bot-builder-howto-deploy-azure?view=azure-bot-service-4.0"
     }
   ]
 }
