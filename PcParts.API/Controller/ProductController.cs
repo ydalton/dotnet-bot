@@ -18,9 +18,18 @@ public class ProductController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<ProductResponse>>> GetAllProducts()
+    public async Task<ActionResult<IEnumerable<ProductResponse>>> GetAllProducts(string? q)
     {
-        IEnumerable<Product> products = await _productRepository.GetAllAsync();
+        IEnumerable<Product> products;
+
+        if (q == null)
+        {
+            products = await _productRepository.GetAllAsync();
+        }
+        else
+        {
+            products = await _productRepository.GetAsync(filter: p => p.Name.Contains(q));
+        }
         List<ProductResponse> productResponses = products.Select(product => Mapper.ProductToDto(product)).ToList();
         return Ok(productResponses);
     }
