@@ -46,6 +46,9 @@ namespace CoreBot
             
             // Register the ReturnOrderDialog.
             services.AddSingleton<ReturnOrderDialog>();
+            
+            // Register the openingHoursDialog.
+            services.AddSingleton<OpeningHoursDialog>();
 
             // The MainDialog that will be run by the bot.
             services.AddSingleton<MainDialog>();

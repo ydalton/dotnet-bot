@@ -21,6 +21,7 @@ namespace CoreBot.Dialogs
 
         // Dependency injection uses this constructor to instantiate MainDialog
         public MainDialog(FlightBookingRecognizer luisRecognizer, OrderDialog orderDialog,
+            OpeningHoursDialog openingHoursDialog,
             ReturnOrderDialog returnOrderDialog,
             ILogger<MainDialog> logger)
             : base(nameof(MainDialog))
@@ -31,6 +32,7 @@ namespace CoreBot.Dialogs
             AddDialog(new TextPrompt(nameof(TextPrompt)));
             AddDialog(orderDialog);
             AddDialog(returnOrderDialog);
+            AddDialog(openingHoursDialog);
 
             var waterfallSteps = new WaterfallStep[]
             {
@@ -109,6 +111,9 @@ namespace CoreBot.Dialogs
                     // Start a child dialog to return an order
                     return await stepContext.BeginDialogAsync(nameof(ReturnOrderDialog), new ReturnOrderDetails(),
                         cancellationToken);
+                case "Show opening hours":
+                    // Start a child dialog to show opening hours
+                    return await stepContext.BeginDialogAsync(nameof(OpeningHoursDialog), cancellationToken: cancellationToken);
                 default:
                     // Skip to next step in the waterfall
                     return await stepContext.NextAsync(null, cancellationToken);
