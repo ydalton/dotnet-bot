@@ -29,6 +29,8 @@ namespace CoreBot.Dialogs
         private const string PostCodeStepMsgText = "What is your zipcode?";
         private const string DeliveryStepMsgText = "Would you like a delivery or do you want it to pick it up yourself?";
         private const string ConfirmStepMsgText = "Is this correct?";
+        
+        private const string ProductValidationStepId = "ProductValidationStepId";
 
         private List<ProductResponse> products;
 
@@ -37,6 +39,7 @@ namespace CoreBot.Dialogs
         {
             AddDialog(new TextPrompt(nameof(TextPrompt)));
             AddDialog(new ChoicePrompt(nameof(ChoicePrompt)));
+            AddDialog(new TextPrompt(ProductValidationStepId, ProductValidationAsync));
 
             var waterfallSteps = new WaterfallStep[]
             {
@@ -66,7 +69,7 @@ namespace CoreBot.Dialogs
             {
                 var promptMessage = MessageFactory.Text(ProductStepMsgText,
                     ProductStepMsgText, InputHints.ExpectingInput);
-                return await stepContext.PromptAsync(nameof(TextPrompt),
+                return await stepContext.PromptAsync(ProductValidationStepId,
                     new PromptOptions { Prompt = promptMessage }, cancellationToken);
             }
             
@@ -248,6 +251,34 @@ namespace CoreBot.Dialogs
             }
 
             return await stepContext.EndDialogAsync(null, cancellationToken);
+        }
+
+        /* search if there is such a product */
+        private async Task<bool> ProductValidationAsync(PromptValidatorContext<string> promptContext,
+            CancellationToken cancellationToken)
+        {
+            /* HACK */
+            string name = promptContext.Recognized.Value;
+            var products = await ProductService.GetProductsByName(name);
+            string message;
+
+            if (products.Count() == 1)
+            {
+                return true;
+            }
+            if (products.Count() > 1)
+            {
+                message =
+                    "There are many products with this name, can you be more specific?";
+            }
+            else
+            {
+                message = "The product you gave does not exist.";
+            }
+
+            await promptContext.Context.SendActivityAsync(message,
+                cancellationToken: cancellationToken);
+            return false;
         }
     }
 }
