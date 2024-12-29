@@ -7,8 +7,8 @@ namespace SolarFlare.Data
     {
         public static void Initialize(BotContext context)
         {
-            context.Database.EnsureDeleted();
-            context.Database.EnsureCreated();
+            if (!context.Database.EnsureCreated())
+                return;
 
             var product1 = new Product
             {
