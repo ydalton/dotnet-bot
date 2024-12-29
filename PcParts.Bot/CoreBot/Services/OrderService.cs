@@ -1,3 +1,4 @@
+#nullable enable
 using System;
 using System.Threading.Tasks;
 using CoreBot.DialogDetails;
@@ -7,9 +8,9 @@ namespace CoreBot.Services;
 
 public class OrderService
 {
-    public static async Task<OrderResponse> GetOrderByIdAsync(Guid id)
+    public static async Task<OrderResponse?> GetOrderByIdAsync(Guid id)
     {
-        return await ApiService<OrderResponse>.GetAsync($"order/{id}");
+        return await ApiService<OrderResponse?>.GetAsync($"order/{id}");
     }
     
     public static async Task<OrderResponse> PostOrder(OrderDetails orderDetails)

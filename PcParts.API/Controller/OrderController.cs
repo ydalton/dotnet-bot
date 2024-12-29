@@ -33,7 +33,7 @@ public class OrderController : ControllerBase
     {
         var order = await _orderRepository.GetAsync(includes: o => o.Products, filter: o => o.Id == id);
 
-        if (order.First() == null)
+        if (!order.Any())
         {
             return NotFound();
         }

@@ -171,16 +171,26 @@ public class ReturnOrderDialog : CancelAndHelpDialog
     private async Task<bool> OrderNumberValidation(PromptValidatorContext<string> promptcontext, CancellationToken cancellationtoken)
     {
         const string OrderNumberError = "The order number you entered is not valid or there has been a request for a return already for this order number. Please enter a valid order number.";
+        Guid orderNumberGuid;
 
         string orderNumber = promptcontext.Recognized.Value;
-        var orderNumberGuid = Guid.Parse(orderNumber);
-        var order = await OrderService.GetOrderByIdAsync(orderNumberGuid);
+        try
+        {
+            orderNumberGuid = Guid.Parse(orderNumber);
+        }
+        catch
+        {
+            goto fail;
+        }
+        
         var returnOrder = await ReturnOrderService.CheckOrderNumberExistsInReturnOrder(orderNumberGuid);
         
-        if (order != null && !returnOrder)
+        if (!returnOrder)
         {
             return true;
         }
+        
+        fail:
         await promptcontext.Context.SendActivityAsync(OrderNumberError,
             cancellationToken: cancellationtoken);
         return false;

@@ -222,6 +222,7 @@ namespace CoreBot.Dialogs
                     Title = "Your Order Summary",
                     Facts = new List<Fact>
                     {
+                        new Fact("Order number", orderResponse.Id.ToString()),
                         new Fact("Name", orderResponse.Name),
                         new Fact("Email Address", orderResponse.Email),
                         new Fact("Street address", orderResponse.Street),

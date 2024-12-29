@@ -1,3 +1,4 @@
+#nullable enable
 using Newtonsoft.Json;
 using System;
 using System.Net.Http;
@@ -8,10 +9,10 @@ namespace CoreBot.Services
 {
     public static class ApiService<T>
     {
-        private static readonly string BASE_URL = "http://localhost:5258/api/";
+        private static readonly string BASE_URL = "http://pcpartsapi.azurewebsites.net/api/";
         static HttpClient client = new HttpClient() { Timeout = TimeSpan.FromSeconds(60) };
 
-        public static async Task<T> GetAsync(string endPoint)
+        public static async Task<T?> GetAsync(string endPoint)
         {
             try
             {
@@ -28,6 +29,11 @@ namespace CoreBot.Services
                     {
                         throw new Exception("Resource Not Found");
                     }
+                }
+                else if (response.StatusCode ==
+                         System.Net.HttpStatusCode.NotFound)
+                {
+                    return default;
                 }
                 else
                 {
