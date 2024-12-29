@@ -1,0 +1,47 @@
+{
+  "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+  "type": "AdaptiveCard",
+  "version": "1.0",
+  "body": [
+    {
+      "type": "ColumnSet",
+      "columns": [
+        {
+          "type": "Column",
+          "width": "stretch",
+          "items": [
+            {
+              "type": "TextBlock",
+              "text": "Pc Parts",
+              "weight": "Bolder",
+              "size": "Large"
+            },
+            {
+              "type": "TextBlock",
+              "text": "Opening hours",
+              "weight": "Bolder",
+              "spacing": "None"
+            }
+          ]
+        },
+        {
+          "type": "Column",
+          "width": "auto",
+          "items": [
+            {
+              "type": "Image",
+              "url": "https://nesimd.pythonanywhere.com/static/logo-pc-part.png",
+              "size": "Medium",
+              "altText": "Pc Parts logo"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "TextBlock",
+      "text": "- Monday: **closed**\n- Tuesday to Friday: 09:00 AM to 06:00 PM\n- Saturday and Sunday: 10:00 PM to 06:00 PM",
+      "wrap": true
+    }
+  ]
+}
