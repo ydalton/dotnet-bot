@@ -49,7 +49,12 @@ public class ReturnOrdersController : ControllerBase
     public async Task<ActionResult<bool>> CheckOrderNumberExists(Guid id)
     {
         var returnOrder = await _returnOrderRepository.GetAsync(filter: ro => ro.OrderId == id);
-    
+        Order? order = await _orderRepository.GetByIdAsync(id);
+        if (order == null)
+        {
+            return Ok(true);
+        }
+        
         if (!returnOrder.Any())
         {
             return Ok(false);
