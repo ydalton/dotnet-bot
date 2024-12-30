@@ -49,6 +49,9 @@ namespace CoreBot
             
             // Register the openingHoursDialog.
             services.AddSingleton<OpeningHoursDialog>();
+            
+            // Register the catalogue dialog
+            services.AddSingleton<CatalogueDialog>();
 
             // The MainDialog that will be run by the bot.
             services.AddSingleton<MainDialog>();

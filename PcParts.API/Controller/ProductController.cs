@@ -18,20 +18,33 @@ public class ProductController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<ProductResponse>>> GetAllProducts(string? q)
+    public async Task<ActionResult<IEnumerable<ProductResponse>>> GetAllProducts([FromQuery(Name = "q")] string? name, string? category)
     {
         IEnumerable<Product> products;
 
-        if (q == null)
+        /* broken if both name and category are not null */
+        if (name != null)
         {
-            products = await _productRepository.GetAllAsync();
+            products = await _productRepository.GetAsync(filter: p => p.Name.Contains(name));
+        }
+        else if (category != null)
+        {
+            products = await _productRepository.GetAsync(filter: p => p.Category == category);
         }
         else
         {
-            products = await _productRepository.GetAsync(filter: p => p.Name.Contains(q));
+            products = await _productRepository.GetAllAsync();
         }
         List<ProductResponse> productResponses = products.Select(product => Mapper.ProductToDto(product)).ToList();
         return Ok(productResponses);
+    }
+
+    [HttpGet("Categories")]
+    public async Task<ActionResult<IEnumerable<string>>> GetCategories()
+    {
+        var categories = await _productRepository.GetAllAsync();
+        
+        return categories.Select(c => c.Category).Distinct().ToList();
     }
 
     [HttpGet("{id:guid}")]
