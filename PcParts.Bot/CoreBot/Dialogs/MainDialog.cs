@@ -23,6 +23,7 @@ namespace CoreBot.Dialogs
         public MainDialog(FlightBookingRecognizer luisRecognizer, OrderDialog orderDialog,
             OpeningHoursDialog openingHoursDialog,
             ReturnOrderDialog returnOrderDialog,
+            CatalogueDialog catalogueDialog,
             ILogger<MainDialog> logger)
             : base(nameof(MainDialog))
         {
@@ -33,6 +34,7 @@ namespace CoreBot.Dialogs
             AddDialog(orderDialog);
             AddDialog(returnOrderDialog);
             AddDialog(openingHoursDialog);
+            AddDialog(catalogueDialog);
 
             var waterfallSteps = new WaterfallStep[]
             {
@@ -114,6 +116,10 @@ namespace CoreBot.Dialogs
                 case "Show opening hours":
                     // Start a child dialog to show opening hours
                     return await stepContext.BeginDialogAsync(nameof(OpeningHoursDialog), cancellationToken: cancellationToken);
+                case "Show catalogue":
+                    // Start a child dialog to show catalogue
+                    return await stepContext.BeginDialogAsync(nameof(CatalogueDialog), null,
+                        cancellationToken);
                 default:
                     // Skip to next step in the waterfall
                     return await stepContext.NextAsync(null, cancellationToken);
