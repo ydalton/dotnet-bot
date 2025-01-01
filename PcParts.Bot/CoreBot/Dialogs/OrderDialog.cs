@@ -24,6 +24,7 @@ namespace CoreBot.Dialogs
             "What would you like to order?";
         private const string NameStepMsgText = "What is your name?";
         private const string EmailStepMsgText = "What is your email address?";
+        private const string PhoneStepMsgText = "What is your phone number?";
         private const string AddressStepMsgText = "What is your street address?";
         private const string CityStepMsgText = "What is your city?";
         private const string PostCodeStepMsgText = "What is your zipcode?";
@@ -44,9 +45,10 @@ namespace CoreBot.Dialogs
             var waterfallSteps = new WaterfallStep[]
             {
                 ProductStepAsync,
-                FirstNameStepAsync,
+                NameStepAsync,
                 NameEmailStepAsync,
-                EmailAddressStepAsync,
+                EmailPhoneStepAsync,
+                PhoneAddressStepAsync,
                 AddressCityStepAsync,
                 CityZipCodeStepAsync,
                 ZipCodeDeliveryStepAsync,
@@ -76,7 +78,7 @@ namespace CoreBot.Dialogs
             return await stepContext.NextAsync(orderDetails.Name, cancellationToken);
         }
 
-        private async Task<DialogTurnResult> FirstNameStepAsync(WaterfallStepContext stepContext,
+        private async Task<DialogTurnResult> NameStepAsync(WaterfallStepContext stepContext,
             CancellationToken cancellationToken)
         {
             OrderDetails orderDetails = (OrderDetails)stepContext.Options;
@@ -111,11 +113,29 @@ namespace CoreBot.Dialogs
             return await stepContext.NextAsync(orderDetails.EmailAddress, cancellationToken);
         }
 
-        private async Task<DialogTurnResult> EmailAddressStepAsync(WaterfallStepContext stepContext,
+        private async Task<DialogTurnResult> EmailPhoneStepAsync(WaterfallStepContext stepContext,
             CancellationToken cancellationToken)
         {
             OrderDetails orderDetails = (OrderDetails)stepContext.Options;
             orderDetails.EmailAddress = (string)stepContext.Result;
+
+            if (orderDetails.PhoneNumber == null)
+            {
+                var promptMessage = MessageFactory.Text(PhoneStepMsgText,
+                    PhoneStepMsgText, InputHints.ExpectingInput);
+                return await stepContext.PromptAsync(nameof(TextPrompt),
+                    new PromptOptions { Prompt = promptMessage }, cancellationToken);
+            }
+
+            return await stepContext.NextAsync(orderDetails.StreetAddress, cancellationToken);
+        }
+
+        private async Task<DialogTurnResult> PhoneAddressStepAsync(
+            WaterfallStepContext stepContext,
+            CancellationToken cancellationToken)
+        {
+            OrderDetails orderDetails = (OrderDetails)stepContext.Options;
+            orderDetails.PhoneNumber = (string)stepContext.Result;
 
             if (orderDetails.StreetAddress == null)
             {
@@ -194,12 +214,13 @@ namespace CoreBot.Dialogs
             
             var deliveryMethod = orderDetails.IsDelivery ? "Delivery" : "Pick-up";
             var messageText =
-                $"Okay, I have written down the details of the order:\n\n"
-                + $"Name: {orderDetails.Name}\n"
-                + $"Email: {orderDetails.EmailAddress}\n"
-                + $"Address: {orderDetails.StreetAddress}\n"
-                + $"City: {orderDetails.City}\n"
-                + $"Post code: {orderDetails.ZipCode}\n"
+                $"Okay, I have written down the details of the order:\n\n\n\n"
+                + $"Name: {orderDetails.Name}\n\n"
+                + $"Email: {orderDetails.EmailAddress}\n\n"
+                + $"Phone Number: {orderDetails.PhoneNumber}\n\n"
+                + $"Address: {orderDetails.StreetAddress}\n\n"
+                + $"City: {orderDetails.City}\n\n"
+                + $"Post code: {orderDetails.ZipCode}\n\n"
                 + $"Delivery method: {deliveryMethod}\n\n";
 
             var promptMessage = MessageFactory.Text(messageText,
@@ -220,33 +241,9 @@ namespace CoreBot.Dialogs
                 var orderDetails = (OrderDetails)stepContext.Options;
                 OrderResponse orderResponse = await OrderService.PostOrder(orderDetails);
 
-                ReceiptCard receiptCard = new()
-                {
-                    Title = "Your Order Summary",
-                    Facts = new List<Fact>
-                    {
-                        new Fact("Order number", orderResponse.Id.ToString()),
-                        new Fact("Name", orderResponse.Name),
-                        new Fact("Email Address", orderResponse.Email),
-                        new Fact("Street address", orderResponse.Street),
-                        new Fact("City", orderResponse.City),
-                        new Fact("Zip code", orderDetails.ZipCode)
-                    },
-                    Items = orderResponse.Products.Select(p =>
-                    {
-                        return new ReceiptItem
-                        {
-                            Title = p.Name,
-                            Price = p.Price.ToString(CultureInfo.InvariantCulture),
-                            Quantity = "1",
-                        };
-                    }).ToList(),
-                    Total = orderResponse.Products.Select(p => p.Price)
-                                                  .Sum()
-                                                  .ToString(CultureInfo.InvariantCulture),
-                };
+                var message = $"Okay, I have placed your order. Your order ID is {orderResponse.Id}.";
                 
-                await stepContext.Context.SendActivityAsync(MessageFactory.Attachment(receiptCard.ToAttachment()), cancellationToken);
+                await stepContext.Context.SendActivityAsync(MessageFactory.Text(message), cancellationToken);
                 return await stepContext.EndDialogAsync(orderDetails, cancellationToken);
             }
 
