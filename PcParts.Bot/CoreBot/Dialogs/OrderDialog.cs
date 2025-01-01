@@ -33,8 +33,6 @@ namespace CoreBot.Dialogs
         
         private const string ProductValidationStepId = "ProductValidationStepId";
 
-        private List<ProductResponse> products;
-
         public OrderDialog()
             : base(nameof(OrderDialog))
         {
@@ -65,7 +63,6 @@ namespace CoreBot.Dialogs
         private async Task<DialogTurnResult> ProductStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
             OrderDetails orderDetails = (OrderDetails)stepContext.Options;
-            //products = await ProductService.GetProducts();
 
             if (orderDetails.ProductName == null)
             {
@@ -75,7 +72,7 @@ namespace CoreBot.Dialogs
                     new PromptOptions { Prompt = promptMessage }, cancellationToken);
             }
             
-            return await stepContext.NextAsync(orderDetails.Name, cancellationToken);
+            return await stepContext.NextAsync(orderDetails.ProductName, cancellationToken);
         }
 
         private async Task<DialogTurnResult> ProductNameStepAsync(WaterfallStepContext stepContext,
@@ -127,7 +124,7 @@ namespace CoreBot.Dialogs
                     new PromptOptions { Prompt = promptMessage }, cancellationToken);
             }
 
-            return await stepContext.NextAsync(orderDetails.StreetAddress, cancellationToken);
+            return await stepContext.NextAsync(orderDetails.PhoneNumber, cancellationToken);
         }
 
         private async Task<DialogTurnResult> PhoneAddressStepAsync(
@@ -270,7 +267,7 @@ namespace CoreBot.Dialogs
             }
             else
             {
-                message = "The product you gave does not exist.";
+                message = $"Sorry, we do not sell the \"{name}\" at this moment.";
             }
 
             await promptContext.Context.SendActivityAsync(message,
