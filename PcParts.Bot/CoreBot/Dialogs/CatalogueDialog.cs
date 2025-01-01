@@ -39,55 +39,62 @@ public class CatalogueDialog : CancelAndHelpDialog
         WaterfallStepContext stepContext,
         CancellationToken cancellationToken)
     {
-        List<string> categories = new List<string>()
+        var catalogueDetails = (CatalogueDetails) stepContext.Options ;
+
+        if (catalogueDetails.Category == null)
         {
-            "None",
-        };
-        categories.AddRange(await ProductService.GetCategories());
-        await stepContext.Context.SendActivityAsync(MessageFactory.Text(CategoryStepMsgText), cancellationToken);
-        var options = new PromptOptions()
-        {
-            Prompt = new Activity()
+            List<string> categories = new List<string>()
             {
-                Type = ActivityTypes.Message,
-                Attachments = new List<Attachment>()
+                "None",
+            };
+            categories.AddRange(await ProductService.GetCategories());
+            await stepContext.Context.SendActivityAsync(MessageFactory.Text(CategoryStepMsgText), cancellationToken);
+            var options = new PromptOptions()
+            {
+                Prompt = new Activity()
                 {
-                    CategoryCard.CreateCardAttachment(categories)
+                    Type = ActivityTypes.Message,
+                    Attachments = new List<Attachment>()
+                    {
+                        CategoryCard.CreateCardAttachment(categories)
+                    }
                 }
-            }
-        };
+            };
+            return await stepContext.PromptAsync(CategoryDialogID, options, cancellationToken);
+        }
         
-        return await stepContext.PromptAsync(CategoryDialogID, options, cancellationToken);
+        return await stepContext.NextAsync(catalogueDetails.Category, cancellationToken);
     }
     
     private async Task<DialogTurnResult> FinalStepAsync(
         WaterfallStepContext stepContext,
         CancellationToken cancellationToken)
     {
-        string category;
         string message = "Here is our catalogue";
+        
+        var catalogueDetails = (CatalogueDetails) stepContext.Options;
         
         try
         {
             var result = stepContext.Result.ToString();
             dynamic data = JObject.Parse(result);
-            category = data.categoryChoice.ToString();
+            catalogueDetails.Category = data.categoryChoice.ToString();
         }
         catch (Exception)
         {
-            category = "None";
+            catalogueDetails.Category = "None";
         }
         
         List<ProductResponse> products;
 
-        if (category == "None")
+        if (catalogueDetails.Category == "None")
         {
             products = await ProductService.GetProducts();
         }
         else
         {
-            products = await ProductService.GetProductsByCategory(category);
-            message += $" for the {category} category";
+            products = await ProductService.GetProductsByCategory(catalogueDetails.Category);
+            message += $" for the {catalogueDetails.Category} category";
         }
 
         message += ":";
