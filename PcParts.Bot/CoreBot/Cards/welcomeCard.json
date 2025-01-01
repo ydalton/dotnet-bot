@@ -25,6 +25,46 @@
       "text": "I'm your virtual assistant, here to ensure your shopping experience is exceptional. Whether you're looking to order PC parts, return a product, check our opening hours, or browse our catalog, I'm here to help you every step of the way. Let's make your tech dreams a reality!",
       "wrap": true,
       "maxLines": 0
+    },
+    {
+      "type": "TextBlock",
+      "size": "default",
+      "text": "Here's what I can assist you with:",
+      "weight": "bolder",
+      "wrap": true,
+      "spacing": "medium"
+    },
+    {
+      "type": "TextBlock",
+      "size": "default",
+      "isSubtle": true,
+      "text": "• Order PC parts",
+      "wrap": true,
+      "spacing": "none"
+    },
+    {
+      "type": "TextBlock",
+      "size": "default",
+      "isSubtle": true,
+      "text": "• Return an order",
+      "wrap": true,
+      "spacing": "none"
+    },
+    {
+      "type": "TextBlock",
+      "size": "default",
+      "isSubtle": true,
+      "text": "• Check our opening hours",
+      "wrap": true,
+      "spacing": "none"
+    },
+    {
+      "type": "TextBlock",
+      "size": "default",
+      "isSubtle": true,
+      "text": "• Browse our catalog",
+      "wrap": true,
+      "spacing": "none"
     }
   ]
 }
