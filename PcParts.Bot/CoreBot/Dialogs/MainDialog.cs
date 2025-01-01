@@ -83,11 +83,7 @@ namespace CoreBot.Dialogs
                     return await stepContext.BeginDialogAsync(nameof(OrderDialog), orderDetails, cancellationToken: cancellationToken);
                 case PcPartsBotModel.Intent.ReturnOrder:
                     var returnOrderDetails = new ReturnOrderDetails();
-                    // returnOrderDetails.OrderNumber = result.Entities.GetOrderNumber();
-                    // returnOrderDetails. = result.Entities.GetCount();
-                    // returnOrderDetails.Name = result.Entities.GetTime();
-                    // returnOrderDetails.Name = result.Entities.GetEmail();
-                    // returnOrderDetails.Name = result.Entities.GetPhone();
+                    returnOrderDetails.OrderNumber = result.Entities.GetOrderNumber();
                     return await stepContext.BeginDialogAsync(nameof(ReturnOrderDialog), returnOrderDetails, cancellationToken: cancellationToken);
                 case PcPartsBotModel.Intent.ShowCatalogue:
                     var catalogueDetails = new CatalogueDetails();
@@ -96,8 +92,7 @@ namespace CoreBot.Dialogs
                 case PcPartsBotModel.Intent.ShowOpeningHours:
                     return await stepContext.BeginDialogAsync(nameof(OpeningHoursDialog), cancellationToken: cancellationToken);
                 default:
-                    // Skip to next step in the waterfall
-                    return await stepContext.NextAsync(null, cancellationToken);
+                    return await stepContext.NextAsync("None", cancellationToken);
             }
         }
 
@@ -106,6 +101,10 @@ namespace CoreBot.Dialogs
         {
             // Restart the main dialog with a different message the second time around
             var promptMessage = "What else can I do for you?";
+            if (stepContext.Result is string result && result == "None")
+            {
+                promptMessage = "Sorry, I didn't understand. Can you say it differently?";
+            }
             return await stepContext.ReplaceDialogAsync(InitialDialogId, promptMessage, cancellationToken);
         }
     }

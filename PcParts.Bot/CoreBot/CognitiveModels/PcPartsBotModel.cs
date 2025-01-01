@@ -59,15 +59,15 @@ namespace CoreBot.CognitiveModels
         {
             public CluEntity[] Entities;
 
-            public string GetComponent() => Entities.Where(e => e.Category == "Component").ToArray().FirstOrDefault()?.Text;
-            public string GetDeliveryOption() => Entities.Where(e => e.Category == "DeliveryOption").ToArray().FirstOrDefault()?.Text;
-            public string GetName() => Entities.Where(e => e.Category == "Name").ToArray().FirstOrDefault()?.Text;
-            public string GetEmail() => Entities.Where(e => e.Category == "Email").ToArray().FirstOrDefault()?.Text;
-            public string GetStreet() => Entities.Where(e => e.Category == "Street").ToArray().FirstOrDefault()?.Text;
-            public string GetZipcode() => Entities.Where(e => e.Category == "Zipcode").ToArray().FirstOrDefault()?.Text;
-            public string GetCity() => Entities.Where(e => e.Category == "City").ToArray().FirstOrDefault()?.Text;
+            public string? GetComponent() => Entities.Where(e => e.Category == "Component").ToArray().FirstOrDefault()?.Text;
+            public string GetDeliveryOption() => Entities.Where(e => e.Category == "DeliveryOption").ToArray().FirstOrDefault()?.Text ?? "";
+            public string? GetName() => Entities.Where(e => e.Category == "Name").ToArray().FirstOrDefault()?.Text;
+            public string? GetEmail() => Entities.Where(e => e.Category == "Email").ToArray().FirstOrDefault()?.Text;
+            public string? GetStreet() => Entities.Where(e => e.Category == "Street").ToArray().FirstOrDefault()?.Text;
+            public string? GetZipcode() => Entities.Where(e => e.Category == "Zipcode").ToArray().FirstOrDefault()?.Text;
+            public string? GetCity() => Entities.Where(e => e.Category == "City").ToArray().FirstOrDefault()?.Text;
 
-            public string GetOrderNumber() => Entities.Where(e => e.Category == "OrderNumber").ToArray().FirstOrDefault()?.Text;
+            public string? GetOrderNumber() => Entities.Where(e => e.Category == "OrderNumber").ToArray().FirstOrDefault()?.Text;
         }
     }
 
