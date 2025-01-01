@@ -45,7 +45,7 @@ namespace CoreBot.Dialogs
             var waterfallSteps = new WaterfallStep[]
             {
                 ProductStepAsync,
-                NameStepAsync,
+                ProductNameStepAsync,
                 NameEmailStepAsync,
                 EmailPhoneStepAsync,
                 PhoneAddressStepAsync,
@@ -78,7 +78,7 @@ namespace CoreBot.Dialogs
             return await stepContext.NextAsync(orderDetails.Name, cancellationToken);
         }
 
-        private async Task<DialogTurnResult> NameStepAsync(WaterfallStepContext stepContext,
+        private async Task<DialogTurnResult> ProductNameStepAsync(WaterfallStepContext stepContext,
             CancellationToken cancellationToken)
         {
             OrderDetails orderDetails = (OrderDetails)stepContext.Options;

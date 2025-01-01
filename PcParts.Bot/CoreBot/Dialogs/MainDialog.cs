@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using CoreBot.CognitiveModels;
 using CoreBot.DialogDetails;
 using Microsoft.Bot.Builder;
 using Microsoft.Bot.Builder.Dialogs;
@@ -16,18 +17,19 @@ namespace CoreBot.Dialogs
 {
     public class MainDialog : ComponentDialog
     {
-        private readonly FlightBookingRecognizer _luisRecognizer;
+        private readonly PcPartsCLURecognizer _recognizer;
         private readonly ILogger _logger;
 
         // Dependency injection uses this constructor to instantiate MainDialog
-        public MainDialog(FlightBookingRecognizer luisRecognizer, OrderDialog orderDialog,
+        public MainDialog(PcPartsCLURecognizer pcPartsCluRecognizer,
+            OrderDialog orderDialog,
             OpeningHoursDialog openingHoursDialog,
             ReturnOrderDialog returnOrderDialog,
             CatalogueDialog catalogueDialog,
             ILogger<MainDialog> logger)
             : base(nameof(MainDialog))
         {
-            _luisRecognizer = luisRecognizer;
+            _recognizer = pcPartsCluRecognizer;
             _logger = logger;
 
             AddDialog(new TextPrompt(nameof(TextPrompt)));
@@ -39,7 +41,7 @@ namespace CoreBot.Dialogs
             var waterfallSteps = new WaterfallStep[]
             {
                 FirstActionStepAsync,
-                ActStepAsync,
+                ActionActStepAsync,
                 FinalStepAsync,
             };
 
@@ -49,123 +51,54 @@ namespace CoreBot.Dialogs
             InitialDialogId = nameof(WaterfallDialog);
         }
 
-        // Shows a warning if the requested From or To cities are recognized as entities but they are not in the Airport entity list.
-        // In some cases LUIS will recognize the From and To composite entities as a valid cities but the From and To Airport values
-        // will be empty if those entity values can't be mapped to a canonical item in the Airport.
-        private static async Task ShowWarningForUnsupportedCities(ITurnContext context, FlightBooking luisResult,
-            CancellationToken cancellationToken)
-        {
-            var unsupportedCities = new List<string>();
-
-            var fromEntities = luisResult.FromEntities;
-            if (!string.IsNullOrEmpty(fromEntities.From) && string.IsNullOrEmpty(fromEntities.Airport))
-            {
-                unsupportedCities.Add(fromEntities.From);
-            }
-
-            var toEntities = luisResult.ToEntities;
-            if (!string.IsNullOrEmpty(toEntities.To) && string.IsNullOrEmpty(toEntities.Airport))
-            {
-                unsupportedCities.Add(toEntities.To);
-            }
-
-            if (unsupportedCities.Any())
-            {
-                var messageText =
-                    $"Sorry but the following airports are not supported: {string.Join(',', unsupportedCities)}";
-                var message = MessageFactory.Text(messageText, messageText, InputHints.IgnoringInput);
-                await context.SendActivityAsync(message, cancellationToken);
-            }
-        }
-
         private async Task<DialogTurnResult> FirstActionStepAsync(WaterfallStepContext stepContext,
             CancellationToken cancellationToken)
         {
-            // TODO: if Recognizer is made uncomment this code and change the recognizer to the right one
-            
-            // if (!_luisRecognizer.IsConfigured)
-            // {
-            //     throw new InvalidOperationException("ERROR: CLU not configured");
-            // }
+            if (!_recognizer.IsConfigured)
+            {
+                throw new InvalidOperationException("ERROR: CLU not configured");
+            }
 
             // Use the text provided in FinalStepAsync or the default if it is the first time.
             var messageText = stepContext.Options?.ToString() ?? "What would you like to do?";
             return await stepContext.PromptAsync(nameof(TextPrompt), new PromptOptions { Prompt = MessageFactory.Text(messageText, messageText, InputHints.ExpectingInput) }, cancellationToken);
         }
 
-        private async Task<DialogTurnResult> ActStepAsync(WaterfallStepContext stepContext,
+        private async Task<DialogTurnResult> ActionActStepAsync(WaterfallStepContext stepContext,
             CancellationToken cancellationToken)
         {
-            // if (!_luisRecognizer.IsConfigured)
-            // {
-            //     // LUIS is not configured, we just run the BookingDialog path with an empty BookingDetailsInstance.
-            //     return await stepContext.BeginDialogAsync(nameof(OrderDialog), new OrderDetails(),
-            //         cancellationToken);
-            // }
-
-            switch ((string)stepContext.Result)
+            var result = await _recognizer.RecognizeAsync<PcPartsBotModel>(stepContext.Context, cancellationToken);
+            
+            switch(result.GetTopIntent().intent)
             {
-                case "Order product":
-                    // Start a child dialog to order a product
-                    return await stepContext.BeginDialogAsync(nameof(OrderDialog), new OrderDetails(),
-                        cancellationToken);
-                case "Return order":
-                    // Start a child dialog to return an order
-                    return await stepContext.BeginDialogAsync(nameof(ReturnOrderDialog), new ReturnOrderDetails(),
-                        cancellationToken);
-                case "Show opening hours":
-                    // Start a child dialog to show opening hours
+                case PcPartsBotModel.Intent.OrderProduct:
+                    var orderDetails = new OrderDetails();
+                    orderDetails.ProductName = result.Entities.GetComponent();
+                    orderDetails.Name = result.Entities.GetName();
+                    orderDetails.EmailAddress = result.Entities.GetEmail();
+                    orderDetails.StreetAddress = result.Entities.GetStreet();
+                    orderDetails.City = result.Entities.GetCity();
+                    orderDetails.ZipCode = result.Entities.GetZipcode();
+                    orderDetails.IsDelivery = result.Entities.GetDeliveryOption().ToLower().Contains("delivery");
+                    return await stepContext.BeginDialogAsync(nameof(OrderDialog), orderDetails, cancellationToken: cancellationToken);
+                case PcPartsBotModel.Intent.ReturnOrder:
+                    var returnOrderDetails = new ReturnOrderDetails();
+                    // returnOrderDetails.OrderNumber = result.Entities.GetOrderNumber();
+                    // returnOrderDetails. = result.Entities.GetCount();
+                    // returnOrderDetails.Name = result.Entities.GetTime();
+                    // returnOrderDetails.Name = result.Entities.GetEmail();
+                    // returnOrderDetails.Name = result.Entities.GetPhone();
+                    return await stepContext.BeginDialogAsync(nameof(ReturnOrderDialog), returnOrderDetails, cancellationToken: cancellationToken);
+                case PcPartsBotModel.Intent.ShowCatalogue:
+                    var catalogueDetails = new CatalogueDetails();
+                    catalogueDetails.Category = result.Entities.GetComponent();
+                    return await stepContext.BeginDialogAsync(nameof(CatalogueDialog), catalogueDetails, cancellationToken: cancellationToken);
+                case PcPartsBotModel.Intent.ShowOpeningHours:
                     return await stepContext.BeginDialogAsync(nameof(OpeningHoursDialog), cancellationToken: cancellationToken);
-                case "Show catalogue":
-                    // Start a child dialog to show catalogue
-                    return await stepContext.BeginDialogAsync(nameof(CatalogueDialog), new CatalogueDetails(),
-                        cancellationToken);
                 default:
                     // Skip to next step in the waterfall
                     return await stepContext.NextAsync(null, cancellationToken);
             }
-
-            // Call LUIS and gather any potential booking details. (Note the TurnContext has the response to the prompt.)
-            var luisResult =
-                await _luisRecognizer.RecognizeAsync<FlightBooking>(stepContext.Context, cancellationToken);
-            switch (luisResult.TopIntent().intent)
-            {
-                case FlightBooking.Intent.BookFlight:
-                    await ShowWarningForUnsupportedCities(stepContext.Context, luisResult, cancellationToken);
-
-                    // Initialize BookingDetails with any entities we may have found in the response.
-                    var bookingDetails = new OrderDetails()
-                    {
-                        // Get destination and origin from the composite entities arrays.
-                        /*
-                        Destination = luisResult.ToEntities.Airport,
-                        Origin = luisResult.FromEntities.Airport,
-                        TravelDate = luisResult.TravelDate,
-                    */
-                    };
-
-                    // Run the BookingDialog giving it whatever details we have from the LUIS call, it will fill out the remainder.
-                    return await stepContext.BeginDialogAsync(nameof(OrderDialog), bookingDetails, cancellationToken);
-
-                case FlightBooking.Intent.GetWeather:
-                    // We haven't implemented the GetWeatherDialog so we just display a TODO message.
-                    var getWeatherMessageText = "TODO: get weather flow here";
-                    var getWeatherMessage = MessageFactory.Text(getWeatherMessageText, getWeatherMessageText,
-                        InputHints.IgnoringInput);
-                    await stepContext.Context.SendActivityAsync(getWeatherMessage, cancellationToken);
-                    break;
-
-                default:
-                    // Catch all for unhandled intents
-                    var didntUnderstandMessageText =
-                        $"Sorry, I didn't get that. Please try asking in a different way (intent was {luisResult.TopIntent().intent})";
-                    var didntUnderstandMessage = MessageFactory.Text(didntUnderstandMessageText,
-                        didntUnderstandMessageText, InputHints.IgnoringInput);
-                    await stepContext.Context.SendActivityAsync(didntUnderstandMessage, cancellationToken);
-                    break;
-            }
-
-            return await stepContext.NextAsync(null, cancellationToken);
         }
 
         private async Task<DialogTurnResult> FinalStepAsync(WaterfallStepContext stepContext,
