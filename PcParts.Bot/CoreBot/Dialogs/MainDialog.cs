@@ -118,7 +118,7 @@ namespace CoreBot.Dialogs
                     return await stepContext.BeginDialogAsync(nameof(OpeningHoursDialog), cancellationToken: cancellationToken);
                 case "Show catalogue":
                     // Start a child dialog to show catalogue
-                    return await stepContext.BeginDialogAsync(nameof(CatalogueDialog), null,
+                    return await stepContext.BeginDialogAsync(nameof(CatalogueDialog), new CatalogueDetails(),
                         cancellationToken);
                 default:
                     // Skip to next step in the waterfall
