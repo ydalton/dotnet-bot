@@ -16,4 +16,9 @@ public class ReasonService
     {
         return await ApiService<List<ReasonResponse>>.GetAsync("reasons");
     }
+    
+    public static async Task<ReasonResponse> GetReasonByCodeAsync(string code)
+    {
+        return await ApiService<ReasonResponse>.GetAsync($"reasons/by-code/{code}");
+    }
 }

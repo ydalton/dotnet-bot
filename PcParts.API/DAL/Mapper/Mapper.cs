@@ -30,7 +30,7 @@ public static class Mapper
             Street = order.Street,
             City = order.City,
             ZipCode = order.ZipCode,
-            IsDelivery = order.IsDelivery,
+            DeliveryOption = order.DeliveryOption,
             Products = order.Products.Select(product => ProductToDto(product)).ToList()
         };
     }
@@ -40,7 +40,8 @@ public static class Mapper
         return new ReasonResponse()
         {
             Id = reason.Id,
-            Name = reason.Name
+            Name = reason.Name,
+            Code = reason.Code,
         };
     }
     
@@ -51,7 +52,7 @@ public static class Mapper
             Id = returnOrder.Id,
             OrderId = returnOrder.OrderId,
             Reason = ReasonToDto(returnOrder.Reason),
-            IsCash = returnOrder.IsCash,
+            RefundOption = returnOrder.RefundOption,
         };
     }
 }

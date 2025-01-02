@@ -32,12 +32,12 @@ namespace CoreBot.Cards
                     new AdaptiveChoiceSetInput
                     {
                         Id = "reasonChoice",
-                        Value = reasons[0].Id.ToString(),
+                        Value = reasons[0].Code,
                         Style = AdaptiveChoiceInputStyle.Compact,
                         Choices = reasons.Select(reason => new AdaptiveChoice
                         {
                             Title = reason.Name,
-                            Value = reason.Id.ToString(),
+                            Value = reason.Code,
                         }).ToList()
                     }
                 },

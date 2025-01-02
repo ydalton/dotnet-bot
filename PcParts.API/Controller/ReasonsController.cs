@@ -38,4 +38,18 @@ public class ReasonsController : ControllerBase
         ReasonResponse reasonResponse = Mapper.ReasonToDto(reason);
         return Ok(reasonResponse);
     }
+    
+    [HttpGet("by-code/{code}")]
+    public async Task<ActionResult<ReasonResponse>> GetCategoryByCode(string code)
+    {
+        var reason = await _reasonRepository.GetAsync(filter: r => r.Code == code);
+
+        if (!reason.Any())
+        {
+            return NotFound();
+        }
+
+        ReasonResponse reasonResponse = Mapper.ReasonToDto(reason.First());
+        return Ok(reasonResponse);
+    }
 }

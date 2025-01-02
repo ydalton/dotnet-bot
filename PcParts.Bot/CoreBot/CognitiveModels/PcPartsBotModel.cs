@@ -66,8 +66,10 @@ namespace CoreBot.CognitiveModels
             public string? GetStreet() => Entities.Where(e => e.Category == "Street").ToArray().FirstOrDefault()?.Text;
             public string? GetZipcode() => Entities.Where(e => e.Category == "Zipcode").ToArray().FirstOrDefault()?.Text;
             public string? GetCity() => Entities.Where(e => e.Category == "City").ToArray().FirstOrDefault()?.Text;
+            public string? GetPhone() => Entities.Where(e => e.Category == "Phone").ToArray().FirstOrDefault()?.Text;
 
             public string? GetOrderNumber() => Entities.Where(e => e.Category == "OrderNumber").ToArray().FirstOrDefault()?.Text;
+            public string? GetRefundOption() => Entities.Where(e => e.Category == "RefundOption").ToArray().FirstOrDefault()?.Text;
         }
     }
 

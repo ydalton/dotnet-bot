@@ -69,7 +69,7 @@ public class ReturnOrderDialog : CancelAndHelpDialog
         var returnOrderDetails = (ReturnOrderDetails)stepContext.Options;
         returnOrderDetails.OrderNumber = (string)stepContext.Result;
 
-        if (returnOrderDetails.ReasonId == null)
+        if (returnOrderDetails.Reason == null)
         {
             var promptMessage = MessageFactory.Text(ReasonStepMsgText,
                 ReasonStepMsgText, InputHints.ExpectingInput);
@@ -90,7 +90,7 @@ public class ReturnOrderDialog : CancelAndHelpDialog
             return await stepContext.PromptAsync(ReasonDialogID, options, cancellationToken);
         }
 
-        return await stepContext.NextAsync(returnOrderDetails.ReasonId, cancellationToken);
+        return await stepContext.NextAsync(returnOrderDetails.Reason, cancellationToken);
     }
 
     private async Task<DialogTurnResult> ReasonRefundOptionStepAsync(WaterfallStepContext stepContext,
@@ -102,43 +102,43 @@ public class ReturnOrderDialog : CancelAndHelpDialog
         {
             var result = stepContext.Result.ToString();
             dynamic data = JObject.Parse(result);
-            returnOrderDetails.ReasonId = data.reasonChoice.ToString();
+            returnOrderDetails.Reason = data.reasonChoice.ToString();
         }
         catch (Exception)
         {
-            returnOrderDetails.ReasonId = (string)stepContext.Result;
+            returnOrderDetails.Reason = (string)stepContext.Result;
         }
 
-        if (returnOrderDetails.IsCash == false)
+        if (returnOrderDetails.RefundOption == null)
         {
             await stepContext.Context.SendActivityAsync(MessageFactory.Text(RefundOptionStepMsgText),
                 cancellationToken);
-            List<string> refundOptionList = new List<string> { "Cash", "Gift card" };
+            List<string> refundOptionList = new List<string> { "cash", "gift card" };
             return await ChoicePromptHelper.PromptChoiceAsync(refundOptionList, stepContext, cancellationToken);
         }
 
-        return await stepContext.NextAsync(returnOrderDetails.IsCash, cancellationToken);
+        return await stepContext.NextAsync(returnOrderDetails.RefundOption, cancellationToken);
     }
 
     private async Task<DialogTurnResult> RefundOptionConfirmStepAsync(WaterfallStepContext stepContext,
         CancellationToken cancellationToken)
     {
         var returnOrderDetails = (ReturnOrderDetails)stepContext.Options;
-        if (((FoundChoice)stepContext.Result).Value == "Cash")
+        try
         {
-            returnOrderDetails.IsCash = true;
+            returnOrderDetails.RefundOption = ((FoundChoice)stepContext.Result).Value;
         }
-        else if (((FoundChoice)stepContext.Result).Value == "Gift Card")
+        catch (Exception)
         {
-            returnOrderDetails.IsCash = false;
+            returnOrderDetails.RefundOption = (string)stepContext.Result;
         }
         
-        var reason = await ReasonService.GetReasonByIdAsync(Guid.Parse(returnOrderDetails.ReasonId));
+        var reason = await ReasonService.GetReasonByCodeAsync(returnOrderDetails.Reason);
 
         var attachment = ConfirmCardReturn.CreateCardAttachment(
             $"Order Number: {returnOrderDetails.OrderNumber}",
             $"Reason: {reason.Name}",
-            $"Refund Option: {(returnOrderDetails.IsCash ? "Cash" : "Gift card")}");
+            $"Refund Option: {returnOrderDetails.RefundOption}");
         
         var activity = MessageFactory.Attachment(attachment);
         await stepContext.Context.SendActivityAsync(activity, cancellationToken);
@@ -153,11 +153,13 @@ public class ReturnOrderDialog : CancelAndHelpDialog
         if (((FoundChoice)stepContext.Result).Value == "Yes")
         {
             var returnOrderDetails = (ReturnOrderDetails)stepContext.Options;
+            
+            var reason = await ReasonService.GetReasonByCodeAsync(returnOrderDetails.Reason);
             await ReturnOrderService.InsertReturnOrderAsync(new ReturnOrderRequest()
             {
                 OrderId = returnOrderDetails.OrderNumber,
-                IsCash = returnOrderDetails.IsCash,
-                ReasonId = returnOrderDetails.ReasonId,
+                RefundOption = returnOrderDetails.RefundOption,
+                Reason = returnOrderDetails.Reason,
             });
             await stepContext.Context.SendActivityAsync(MessageFactory.Text("Your return is created!"), cancellationToken);
             await stepContext.Context.SendActivityAsync(MessageFactory.Text("Place all items back in the original box. Seal the box. Then, drop off the package at a post office, Post point, or Parcel Point."), cancellationToken);

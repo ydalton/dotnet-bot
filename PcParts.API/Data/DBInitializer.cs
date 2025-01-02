@@ -102,7 +102,7 @@ namespace SolarFlare.Data
                 Street = "Kerkstraat",
                 City = "Antwerpen",
                 ZipCode = "2000",
-                IsDelivery = true,
+                DeliveryOption = "delivery",
                 Products = new List<Product> { product2, product3, product7 }
             };
             
@@ -115,7 +115,7 @@ namespace SolarFlare.Data
                 Street = "Nieuwelaan",
                 City = "Brussel",
                 ZipCode = "1000",
-                IsDelivery = true,
+                DeliveryOption = "delivery",
                 Products = new List<Product> { product6 }
             };
             
@@ -128,7 +128,7 @@ namespace SolarFlare.Data
                 Street = "Lentestraat",
                 City = "Antwerpen",
                 ZipCode = "2000",
-                IsDelivery = false,
+                DeliveryOption = "pick-up",
                 Products = new List<Product> { product3, product4 }
             };
             
@@ -138,31 +138,37 @@ namespace SolarFlare.Data
             var reason1 = new Reason
             {
                 Id = Guid.NewGuid(),
-                Name = "The item is defective or damaged"
+                Name = "The item is defective or damaged",
+                Code = "faulty"
             };
 
             var reason2 = new Reason
             {
                 Id = Guid.NewGuid(),
-                Name = "The item did not meet your expectations"
+                Name = "The item did not meet your expectations",
+                Code = "disappointing"
             };
 
             var reason3 = new Reason
             {
                 Id = Guid.NewGuid(),
-                Name = "Received the wrong item"
+                Name = "Received the wrong item",
+                Code = "incorrect"
+                
             };
 
             var reason4 = new Reason
             {
                 Id = Guid.NewGuid(),
-                Name = "The item is the wrong color"
+                Name = "The item is the wrong color",
+                Code = "mismatched"
             };
 
             var reason5 = new Reason
             {
                 Id = Guid.NewGuid(),
-                Name = "Something else"
+                Name = "Something else",
+                Code = "other"
             };
 
             context.Reasons.AddRange(reason1, reason2, reason3, reason4, reason5);
@@ -173,7 +179,7 @@ namespace SolarFlare.Data
                 Id = Guid.NewGuid(),
                 OrderId = order1.Id,
                 Reason = reason1,
-                IsCash = true
+                RefundOption = "cash"
             };
             
             var returnOrder2 = new ReturnOrder
@@ -181,7 +187,7 @@ namespace SolarFlare.Data
                 Id = Guid.NewGuid(),
                 OrderId = order2.Id,
                 Reason = reason4,
-                IsCash = true
+                RefundOption = "cash"
             };
             
             context.ReturnOrders.AddRange(returnOrder1, returnOrder2);
