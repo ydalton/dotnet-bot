@@ -9,6 +9,6 @@ public class OrderResponse
     public string Street { get; set; }
     public string City { get; set; }
     public string ZipCode { get; set; }
-    public bool IsDelivery { get; set; }
+    public string DeliveryOption { get; set; }
     public IEnumerable<ProductResponse> Products { get; set; }
 }

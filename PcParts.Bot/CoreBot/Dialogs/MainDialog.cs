@@ -76,10 +76,11 @@ namespace CoreBot.Dialogs
                     orderDetails.ProductName = result.Entities.GetComponent();
                     orderDetails.Name = result.Entities.GetName();
                     orderDetails.EmailAddress = result.Entities.GetEmail();
+                    orderDetails.PhoneNumber = result.Entities.GetPhone();
                     orderDetails.StreetAddress = result.Entities.GetStreet();
                     orderDetails.City = result.Entities.GetCity();
                     orderDetails.ZipCode = result.Entities.GetZipcode();
-                    orderDetails.IsDelivery = result.Entities.GetDeliveryOption().ToLower().Contains("delivery");
+                    orderDetails.DeliveryOption = result.Entities.GetDeliveryOption();
                     return await stepContext.BeginDialogAsync(nameof(OrderDialog), orderDetails, cancellationToken: cancellationToken);
                 case PcPartsBotModel.Intent.ReturnOrder:
                     var returnOrderDetails = new ReturnOrderDetails();

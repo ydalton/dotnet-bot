@@ -66,7 +66,7 @@ public class ReturnOrdersController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<ReturnOrderResponse>> CreateReturnOrder(ReturnOrderRequest returnOrderRequest)
     {
-        var orderId = Guid.Empty; 
+        var orderId = Guid.Empty;
         Reason reason = null;
         
         if (returnOrderRequest.OrderId != null)
@@ -74,10 +74,9 @@ public class ReturnOrdersController : ControllerBase
             orderId = Guid.Parse(returnOrderRequest.OrderId);
         }
         
-        if (returnOrderRequest.ReasonId != null)
+        if (returnOrderRequest.Reason != null)
         {
-            var reasonId = Guid.Parse(returnOrderRequest.ReasonId);
-            var reasons = (await _reasonRepository.GetAsync(filter: r => r.Id == reasonId)).ToList();
+            var reasons = (await _reasonRepository.GetAsync(filter: r => r.Code == returnOrderRequest.Reason)).ToList();
 
             if (reasons.Count == 0)
             {
@@ -91,7 +90,7 @@ public class ReturnOrdersController : ControllerBase
         {
             OrderId = orderId,
             Reason = reason,
-            IsCash = returnOrderRequest.IsCash
+            RefundOption = returnOrderRequest.RefundOption
         };
 
         _returnOrderRepository.Insert(returnOrder);

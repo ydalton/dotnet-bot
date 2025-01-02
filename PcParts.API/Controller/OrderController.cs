@@ -65,7 +65,7 @@ public class OrderController : ControllerBase
             Street = orderRequest.StreetAddress,
             City = orderRequest.City,
             ZipCode = orderRequest.ZipCode,
-            IsDelivery = orderRequest.IsDelivery,
+            DeliveryOption = orderRequest.DeliveryOption,
             Products = new List<Product> { product },
         };
 

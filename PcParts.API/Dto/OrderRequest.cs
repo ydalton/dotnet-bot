@@ -7,7 +7,7 @@ public class OrderRequest
     public string ProductName { get; set; }
     public string Name { get; set; }
     public string? PhoneNumber { get; set; }
-    public bool IsDelivery { get; set; }
+    public string DeliveryOption { get; set; }
     [EmailAddress]
     public string EmailAddress { get; set; }
     public string StreetAddress { get; set; }
