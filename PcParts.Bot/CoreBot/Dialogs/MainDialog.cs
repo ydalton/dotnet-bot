@@ -85,6 +85,8 @@ namespace CoreBot.Dialogs
                 case PcPartsBotModel.Intent.ReturnOrder:
                     var returnOrderDetails = new ReturnOrderDetails();
                     returnOrderDetails.OrderNumber = result.Entities.GetOrderNumber();
+                    returnOrderDetails.Reason = result.Entities.GetReason();
+                    returnOrderDetails.RefundOption = result.Entities.GetRefundOption();
                     return await stepContext.BeginDialogAsync(nameof(ReturnOrderDialog), returnOrderDetails, cancellationToken: cancellationToken);
                 case PcPartsBotModel.Intent.ShowCatalogue:
                     var catalogueDetails = new CatalogueDetails();

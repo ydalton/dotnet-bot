@@ -21,5 +21,8 @@ namespace Microsoft.BotBuilderSamples.Clu
 
         [JsonProperty("confidenceScore")]
         public float ConfidenceScore { get; set; }
+
+        [JsonProperty("extraInformation")]
+        public dynamic ExtraInformation { get; set; }
     }
 }

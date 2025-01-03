@@ -132,8 +132,15 @@ public class ReturnOrderDialog : CancelAndHelpDialog
         {
             returnOrderDetails.RefundOption = (string)stepContext.Result;
         }
-        
-        var reason = await ReasonService.GetReasonByCodeAsync(returnOrderDetails.Reason);
+
+        ReasonResponse? reason;
+        reason = await ReasonService.GetReasonByCodeAsync(returnOrderDetails.Reason);
+
+        if (reason == null)
+        {
+            /* should never fail */
+            reason = await ReasonService.GetReasonByCodeAsync("other");
+        }
 
         var attachment = ConfirmCardReturn.CreateCardAttachment(
             $"Order Number: {returnOrderDetails.OrderNumber}",

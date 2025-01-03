@@ -160,7 +160,7 @@ namespace SolarFlare.Data
             var reason4 = new Reason
             {
                 Id = Guid.NewGuid(),
-                Name = "The item is the wrong color",
+                Name = "The item is mismatched or incompatible.",
                 Code = "mismatched"
             };
 
