@@ -25,6 +25,7 @@ public class ReturnOrderDialog : CancelAndHelpDialog
     private const string ConfirmStepMsgText = "Are you sure you want to return this order?";
    
     private readonly string OrderNumberDialogID = "OrderNumberDialogID";
+    private const string OrderNumberError = "The order number you entered is not valid or there has been a request for a return already for this order number. Please enter a valid order number.";
     
     public ReturnOrderDialog()
         : base(nameof(ReturnOrderDialog))
@@ -176,30 +177,35 @@ public class ReturnOrderDialog : CancelAndHelpDialog
 
         return await stepContext.EndDialogAsync(null, cancellationToken);
     }
-    
-    private async Task<bool> OrderNumberValidation(PromptValidatorContext<string> promptcontext, CancellationToken cancellationtoken)
-    {
-        const string OrderNumberError = "The order number you entered is not valid or there has been a request for a return already for this order number. Please enter a valid order number.";
-        Guid orderNumberGuid;
 
-        string orderNumber = promptcontext.Recognized.Value;
+    private async Task<bool> OrderNumberIsValid(string orderNumber)
+    {
+        Guid orderNumberGuid;
+        
         try
         {
             orderNumberGuid = Guid.Parse(orderNumber);
         }
         catch
         {
-            goto fail;
+            return false;
         }
         
         var returnOrder = await ReturnOrderService.CheckOrderNumberExistsInReturnOrder(orderNumberGuid);
         
-        if (!returnOrder)
+        return returnOrder;
+    }
+    
+    private async Task<bool> OrderNumberValidation(PromptValidatorContext<string> promptcontext, CancellationToken cancellationtoken)
+    {
+
+        string orderNumber = promptcontext.Recognized.Value;
+
+        if (await OrderNumberIsValid(orderNumber))
         {
             return true;
         }
         
-        fail:
         await promptcontext.Context.SendActivityAsync(OrderNumberError,
             cancellationToken: cancellationtoken);
         return false;
