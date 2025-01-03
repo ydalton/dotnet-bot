@@ -72,7 +72,11 @@ namespace CoreBot.CognitiveModels
 
             public string GetReason()
             {
-                CluEntity reason = Entities.Where(e => e.Category == "RefundReason").ToArray().First();
+                CluEntity reason = Entities.Where(e => e.Category == "RefundReason").ToArray().FirstOrDefault();
+                if (reason == null)
+                {
+                    return null;
+                }
                 /* CLU provides an extra information attribute which gives us the key of the reason */
                 if (reason.ExtraInformation != null && reason.ExtraInformation.Length > 0)
                 {
