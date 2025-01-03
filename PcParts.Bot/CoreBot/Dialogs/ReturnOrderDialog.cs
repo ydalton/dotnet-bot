@@ -133,13 +133,12 @@ public class ReturnOrderDialog : CancelAndHelpDialog
             returnOrderDetails.RefundOption = (string)stepContext.Result;
         }
 
-        ReasonResponse reason;
-        try
+        ReasonResponse? reason;
+        reason = await ReasonService.GetReasonByCodeAsync(returnOrderDetails.Reason);
+
+        if (reason == null)
         {
-            reason = await ReasonService.GetReasonByCodeAsync(returnOrderDetails.Reason);
-        }
-        catch (Exception)
-        {
+            /* should never fail */
             reason = await ReasonService.GetReasonByCodeAsync("other");
         }
 
