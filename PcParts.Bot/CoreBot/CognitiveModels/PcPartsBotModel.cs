@@ -78,7 +78,7 @@ namespace CoreBot.CognitiveModels
                     return null;
                 }
                 /* CLU provides an extra information attribute which gives us the key of the reason */
-                if (reason.ExtraInformation != null && reason.ExtraInformation.Length > 0)
+                if (reason.ExtraInformation != null && reason.ExtraInformation.Count > 0)
                 {
                     if(reason.ExtraInformation[0].extraInformationKind == "ListKey")
                         return reason.ExtraInformation[0].key;
