@@ -57,10 +57,10 @@ public class ReturnOrdersController : ControllerBase
         
         if (!returnOrder.Any())
         {
-            return Ok(false);
+            return Ok(true);
         }
         
-        return Ok(true);
+        return Ok(false);
     }
 
     [HttpPost]

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using CoreBot.Cards;
@@ -16,21 +17,22 @@ namespace CoreBot.Dialogs;
 
 public class CatalogueDialog : CancelAndHelpDialog
 {
-    private const string CategoryStepMsgText = "Would you like to view our products of a specific category? Choose \"None\" to show all products.";
-    
+    private const string CategoryStepMsgText =
+        "Would you like to view our products of a specific category? Choose \"None\" to show all products.";
+
     private const string CategoryDialogID = "categoryDialog";
-    
+
     public CatalogueDialog()
         : base(nameof(CatalogueDialog))
     {
         AddDialog(new SelectPromptHelper(CategoryDialogID));
-        
+
         var waterfallSteps = new WaterfallStep[]
         {
             CategoryStepAsync,
             FinalStepAsync,
         };
-        
+
         AddDialog(new WaterfallDialog(nameof(WaterfallDialog), waterfallSteps));
         InitialDialogId = nameof(WaterfallDialog);
     }
@@ -39,7 +41,7 @@ public class CatalogueDialog : CancelAndHelpDialog
         WaterfallStepContext stepContext,
         CancellationToken cancellationToken)
     {
-        var catalogueDetails = (CatalogueDetails) stepContext.Options ;
+        var catalogueDetails = (CatalogueDetails)stepContext.Options;
 
         if (catalogueDetails.Category == null)
         {
@@ -62,29 +64,34 @@ public class CatalogueDialog : CancelAndHelpDialog
             };
             return await stepContext.PromptAsync(CategoryDialogID, options, cancellationToken);
         }
-        
+
         return await stepContext.NextAsync(catalogueDetails.Category, cancellationToken);
     }
-    
+
     private async Task<DialogTurnResult> FinalStepAsync(
         WaterfallStepContext stepContext,
         CancellationToken cancellationToken)
     {
         string message = "Here is our catalogue";
+
+        var catalogueDetails = (CatalogueDetails)stepContext.Options;
         
-        var catalogueDetails = (CatalogueDetails) stepContext.Options;
+        catalogueDetails.Category = stepContext.Result.ToString();
         
-        try
+        var result = stepContext.Result.ToString();
+        var category = await ProductService.GetProductsByCategory(result);
+        if (category.Any())
         {
-            var result = stepContext.Result.ToString();
-            dynamic data = JObject.Parse(result);
-            catalogueDetails.Category = data.categoryChoice.ToString();
+            catalogueDetails.Category = result;
         }
-        catch (Exception)
+        else
         {
             catalogueDetails.Category = "None";
         }
-        
+
+        // dynamic data = JObject.Parse(result);
+        // catalogueDetails.Category = data.categoryChoice.ToString();
+
         List<ProductResponse> products;
 
         if (catalogueDetails.Category == "None")
@@ -98,15 +105,15 @@ public class CatalogueDialog : CancelAndHelpDialog
         }
 
         message += ":";
-        
+
         await stepContext.Context.SendActivityAsync(
             MessageFactory.Text(message), cancellationToken);
-        
+
         var catalogueCard = CatalogueCard.CreateCardAttachment(products);
-        
+
         await stepContext.Context.SendActivityAsync(MessageFactory.Attachment(catalogueCard),
-                                                    cancellationToken);
-        
+            cancellationToken);
+
         return await stepContext.EndDialogAsync(null, cancellationToken);
     }
 }
